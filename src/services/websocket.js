@@ -1,7 +1,8 @@
-const WebSocket = require('ws'); // Бібліотека WebSocket (вбудована для Node.js)
+// src/services/websocket.js
+import { WebSocket } from 'ws';
+import { calculateArbitrageProfit } from '../strategies/arbitrage.js';
 
-let prices = {}; // Об'єкт для збереження цін
-console.log(prices);
+let prices = {};
 
 // Торгові пари
 const symbols = [
@@ -150,12 +151,9 @@ const symbols = [
   "SANDBTC",
 ];
 
-/**
- * Функція для підключення до Binance WebSocket
- * @returns {WebSocket} - Підключення WebSocket
- */
 
-const connectWebSocket = (onMessage) => {
+// Функція для підключення до Binance WebSocket
+export const connectWebSocket = (onMessage) => {
   const streams = symbols
     .map((symbol) => `${symbol.toLowerCase()}@ticker`)
     .join('/');
@@ -169,13 +167,9 @@ const connectWebSocket = (onMessage) => {
   ws.on('message', (message) => {
     try {
       const data = JSON.parse(message);
-
-      // Перевіряємо, чи дані коректні
       if (data.s && data.c) {
-        // Оновлюємо локальний об'єкт з цінами
-          prices[data.s] = parseFloat(data.c);
-        //  console.log("Оновлені ціни:", prices); // Показує, що об"єкт тимчасового зберігання цін оновлюється
-        onMessage(prices);
+        prices[data.s] = parseFloat(data.c);
+        onMessage(prices); // Передаємо оновлені ціни в обробник
       } else {
         console.error('Невірні дані від WebSocket:', data);
       }
@@ -194,5 +188,3 @@ const connectWebSocket = (onMessage) => {
 
   return ws;
 };
-
-module.exports = { connectWebSocket };

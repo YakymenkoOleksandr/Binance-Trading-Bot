@@ -1,9 +1,20 @@
-const { connectWebSocket } = require('./services/websocket');
-const { executeStrategy } = require('./strategies/arbitrage');
+// src/bot.js
+import { connectWebSocket } from './services/websocket.js';
+import { calculateArbitrageProfit } from './strategies/arbitrage.js';
 
-const start = async () => {
-  console.log('Bot is starting...');
-  connectWebSocket();
+// Обробник для отриманих даних
+const handlePricesUpdate = (updatedPrices) => {
+  // console.log('Оновлені ціни:', updatedPrices);
+  // Викликаємо обчислення прибутку для арбітражних пар
+  calculateArbitrageProfit(updatedPrices);
 };
 
-module.exports = { start };
+// Підключаємося до WebSocket
+const ws = connectWebSocket(handlePricesUpdate);
+
+export const bot = {
+  start: () => {
+    console.log('Запуск бота');
+    // Тут можна додати подальшу логіку для роботи бота
+  }
+};

@@ -2,10 +2,12 @@
   "name": "binance-trading-bot",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -13,6 +15,7 @@
     "axios": "^1.7.9",
     "binance-api-node": "^0.12.9",
     "dotenv": "^16.4.7",
+    "express": "^4.21.2",
     "ws": "^8.18.0"
   }
 }

@@ -1,3 +1,4 @@
+// src/utils/cslculateProfit.js
 export function calculateProfit({ workingСapital, pricesFirstCoin, pricesCoinToCoin, pricesSecondCoin }) {
   
   // Функція для обчислення суми після вирахування комісії
@@ -13,5 +14,3 @@ export function calculateProfit({ workingСapital, pricesFirstCoin, pricesCoinTo
 
   return profitInPercentage;
 }
-
-module.exports = calculateProfit;
