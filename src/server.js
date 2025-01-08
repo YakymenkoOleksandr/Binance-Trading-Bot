@@ -1,5 +1,5 @@
 import express from 'express';
-import walletRoutes from './routes/wallet.js';
+import walletRoutes from './routes/routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
