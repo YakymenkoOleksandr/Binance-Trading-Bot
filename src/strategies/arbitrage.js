@@ -192,6 +192,9 @@ export const calculateArbitrageProfit = (prices) => {
     { pairName: "SAND→BTC→USDT", first: { symbol: "SANDUSDT", amount: workingСapital / prices['SANDUSDT'] }, second: { symbol: "SANDBTC", amount: (workingСapital / prices['SANDUSDT']) /(1 /  prices['SANDBTC']) }, base: { symbol: "USDT" }, profitInPercentage: calculateProfit({ workingСapital, pricesFirstCoin: prices["SANDUSDT"], pricesSecondCoin: prices["BTCUSDT"], pricesCoinToCoin: 1 / prices["SANDBTC"] }) },
   ];
 
+ // console.log(pairs);
+  
+
   const profitablePairs = pairs.filter(pair => pair.profitInPercentage > 0.1);
   return profitablePairs;
 }

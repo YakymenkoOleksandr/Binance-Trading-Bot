@@ -3,6 +3,8 @@ import crypto from 'crypto';
 
 const apiKey = process.env.BINANCE_API_KEY;
 const apiSecret = process.env.BINANCE_API_SECRET;
+console.log(apiKey, apiSecret);
+
 const baseUrl = 'https://testnet.binance.vision';
 
 const sign = (params, secret) => {
@@ -24,6 +26,9 @@ export const getBalances = async () => {
 };
 
 export const createOrder = async (symbol, side, quantity) => {
+   if (!symbol || !side || !amount) {
+    throw new Error('Необхідні параметри для createOrder відсутні');
+  }
   const endpoint = '/api/v3/order';
   const params = {
     symbol,
