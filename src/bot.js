@@ -8,41 +8,17 @@ const prices = {}; // Кеш для цін
 // Виконання трикутного арбітражу
 const executeArbitrage = async (pair) => {
 
-  log("Кількість першої та другої пари: ", pair)
-  
-  if (!pair || !pair.first || !pair.second || !pair.base) {
-    throw new Error('Невірна структура пари для арбітражу');
-  }
-
-  if (!pair.first.symbol || !pair.second.symbol || !pair.base.symbol) {
-    throw new Error('Відсутні символи валют у парі');
-  }
-
-  if (!pair.first.amount || !pair.second.amount) {
-    throw new Error('Відсутні суми валют у парі');
-  }
-
-  if (!pair.first.amount || !pair.second.amount || isNaN(pair.first.amount) || isNaN(pair.second.amount)) {
-  throw new Error('Некоректні суми валют у парі');
-  }
-  
-  if (!pair.first.amount || !pair.second.amount) {
-  logError('Відсутні значення amount у парі. Операція зупинена.');
-  return;
-}
-
-
-  
   try {
     log(`Старт арбітражу для пари ${pair.pairName}`);
 
     // Купівля першої валюти
     const firstOrder = await createOrder(pair.first.symbol, 'BUY', pair.first.amount);
-    console.log("pair.first.symbol", pair.first.symbol, "pair.first.amount ",  pair.first.amount);
-    
+    log(`Виконання ордера: ${JSON.stringify(firstOrder)}`);
+
     log(`Куплено ${firstOrder.amount} ${pair.first.symbol}`);
 
     // Купівля другої валюти
+    log(`Створюється ордер для ${pair.second.symbol} з кількістю ${pair.second.amount}`);
     const secondOrder = await createOrder(pair.second.symbol, 'BUY', pair.second.amount);
     log(`Куплено ${secondOrder.amount} ${pair.second.symbol}`);
 
@@ -72,7 +48,6 @@ const handlePricesUpdate = (updatedPrices) => {
 
   if (profitablePairs.length > 0) {
     const mostProfitablePair = profitablePairs[0]; // Беремо найвигіднішу пару
-    console.log(mostProfitablePair);
     
     executeArbitrage(mostProfitablePair);
   } else {
