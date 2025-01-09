@@ -41,6 +41,8 @@ export const createOrder = async (symbol, side, quantity) => {
     timestamp: Date.now(),
   };
   const signature = sign(params, apiSecret);
+  console.log(signature);
+  
 
   try {
     const response = await axios.post(`${baseUrl}${endpoint}`, null, {
