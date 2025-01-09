@@ -2,7 +2,10 @@ import { connectWebSocket } from "./services/websocket.js";
 import { calculateArbitrageProfit } from "./strategies/arbitrage.js";
 import { createOrder, getBalances } from "./services/binanceAPI.js";
 import { log, logError } from "./services/logger.js";
-import {checkBalance, checkUSDTBalance, waitForBalanceUpdate} from "./utils/showBalances.js";
+import { checkBalance, checkUSDTBalance, waitForBalanceUpdate } from "./utils/showBalances.js";
+
+let lastLogTime = 0; // Час останнього логування про очікування
+const LOG_INTERVAL = 5000; // Інтервал в мілісекундах (наприклад, 5 секунд)
 
 const prices = {}; // Кеш для цін
 let isExecutingArbitrage = false; // Прапорець виконання
@@ -18,8 +21,12 @@ const calculateAmount = (capital, price) => {
 
 
 const executeArbitrage = async (pair, prices, workingСapital) => {
-  if (isExecutingArbitrage) {
-    log("Арбітраж вже виконується, очікування завершення...");
+   if (isExecutingArbitrage) {
+    const currentTime = Date.now();
+    if (currentTime - lastLogTime > LOG_INTERVAL) {
+      log("Арбітраж вже виконується, очікування завершення...");
+      lastLogTime = currentTime;
+    }
     return; // Чекаємо, поки поточний цикл завершиться
   }
 

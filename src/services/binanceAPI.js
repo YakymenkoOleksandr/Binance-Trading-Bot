@@ -1,7 +1,9 @@
 import axios from 'axios';
 import crypto from 'crypto';
 import { env } from '../utils/env.js'
-import {log, logError} from './logger.js'
+import { log, logError } from './logger.js'
+import { getStepSize, roundToStepSize } from '../utils/quantity.js'
+
 
 const apiKey = env('BINANCE_API_KEY');
 const apiSecret = env('BINANCE_API_SECRET');
@@ -27,25 +29,30 @@ export const getBalances = async () => {
 };
 
 export const createOrder = async (symbol, side, quantity) => {
-   if (!symbol || !side || !quantity) {
-    throw new Error('Необхідні параметри для createOrder відсутні: ' +
-      `symbol=${symbol}, side=${side}, quantity=${quantity}`);
+  if (!symbol || !side || !quantity) {
+    throw new Error(
+      `Необхідні параметри для createOrder відсутні: symbol=${symbol}, side=${side}, quantity=${quantity}`
+    );
   }
 
-  const endpoint = '/api/v3/order';
-  const params = {
-    symbol,
-    side,
-    type: 'MARKET',
-    quantity,
-    timestamp: Date.now(),
-  };
-  const signature = sign(params, apiSecret);
-  console.log(signature);
-  
-
   try {
-    const response = await axios.post(`${baseUrl}${endpoint}`, null, {
+    // Отримуємо stepSize
+    const stepSize = await getStepSize(symbol);
+
+    // Округлюємо кількість
+    const roundedQuantity = roundToStepSize(quantity, stepSize);
+
+    const params = {
+      symbol,
+      side,
+      type: 'MARKET',
+      quantity: roundedQuantity,
+      timestamp: Date.now(),
+    };
+
+    const signature = sign(params, apiSecret);
+
+    const response = await axios.post(`${baseUrl}/api/v3/order/test`, null, {
       headers: { 'X-MBX-APIKEY': apiKey },
       params: { ...params, signature },
     });
@@ -54,8 +61,6 @@ export const createOrder = async (symbol, side, quantity) => {
     return response.data;
   } catch (error) {
     logError(`Помилка під час створення ордеру: ${error.message}`);
-    logError(`Параметри запиту: symbol=${symbol}, side=${side}, quantity=${quantity}, params=${JSON.stringify(params)}`);
     throw error;
   }
-  return response.data;
 };

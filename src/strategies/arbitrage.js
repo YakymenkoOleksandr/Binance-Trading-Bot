@@ -4,7 +4,7 @@ import { calculateProfit } from '../utils/calculateProfit.js'; // Імпорту
 
 // Логіка для обчислення прибутку по арбітражним парам
 export const calculateArbitrageProfit = (prices) => {
-  const workingСapital = 15; // Приклад початкової суми
+  const workingСapital = 100; // Приклад початкової суми
   const slippageTolerance = 0.005;
 
   // Торгові пари для арбітражу

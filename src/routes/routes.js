@@ -38,4 +38,16 @@ router.get('/order/status', async (req, res) => {
   }
 });
 
+router.get('/stepSize/:symbol', async (req, res) => {
+  const { symbol } = req.params;
+
+  try {
+    const stepSize = await getStepSize(symbol);
+    res.json({ symbol, stepSize });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 export default router;
