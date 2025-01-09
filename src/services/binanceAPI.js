@@ -1,9 +1,10 @@
 import axios from 'axios';
 import crypto from 'crypto';
+import { env } from '../utils/env.js'
+import {log, logError} from './logger.js'
 
-const apiKey = process.env.BINANCE_API_KEY;
-const apiSecret = process.env.BINANCE_API_SECRET;
-console.log(apiKey, apiSecret);
+const apiKey = env('BINANCE_API_KEY');
+const apiSecret = env('BINANCE_API_SECRET');
 
 const baseUrl = 'https://testnet.binance.vision';
 
@@ -26,9 +27,11 @@ export const getBalances = async () => {
 };
 
 export const createOrder = async (symbol, side, quantity) => {
-   if (!symbol || !side || !amount) {
-    throw new Error('Необхідні параметри для createOrder відсутні');
+   if (!symbol || !side || !quantity) {
+    throw new Error('Необхідні параметри для createOrder відсутні: ' +
+      `symbol=${symbol}, side=${side}, quantity=${quantity}`);
   }
+
   const endpoint = '/api/v3/order';
   const params = {
     symbol,
@@ -39,10 +42,18 @@ export const createOrder = async (symbol, side, quantity) => {
   };
   const signature = sign(params, apiSecret);
 
-  const response = await axios.post(`${baseUrl}${endpoint}`, null, {
-    headers: { 'X-MBX-APIKEY': apiKey },
-    params: { ...params, signature },
-  });
+  try {
+    const response = await axios.post(`${baseUrl}${endpoint}`, null, {
+      headers: { 'X-MBX-APIKEY': apiKey },
+      params: { ...params, signature },
+    });
 
+    log(`Ордер створено успішно: ${JSON.stringify(response.data)}`);
+    return response.data;
+  } catch (error) {
+    logError(`Помилка під час створення ордеру: ${error.message}`);
+    logError(`Параметри запиту: symbol=${symbol}, side=${side}, quantity=${quantity}, params=${JSON.stringify(params)}`);
+    throw error;
+  }
   return response.data;
 };

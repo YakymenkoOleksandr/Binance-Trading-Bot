@@ -5,7 +5,9 @@ export const log = (message) => {
   console.log(`[${timestamp}] ${message}`);
 };
 
-export const logError = (error) => {
+export const logError = (error, context = '') => {
   const timestamp = new Date().toISOString();
-  console.error(`[${timestamp}] ERROR: ${error.message || error}`);
+  const errorMessage = error.message || error;
+  const stackTrace = error.stack ? `\nStack trace:\n${error.stack}` : '';
+  console.error(`[${timestamp}] ERROR: ${errorMessage}${context ? ` | Context: ${context}` : ''}${stackTrace}`);
 };
