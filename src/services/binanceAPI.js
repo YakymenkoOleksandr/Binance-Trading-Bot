@@ -57,7 +57,8 @@ export const createOrder = async (symbol, side, quantity) => {
       params: { ...params, signature },
     });
 
-    log(`Ордер створено успішно: ${JSON.stringify(response.data)}`);
+    log(`Створення ордеру: ${JSON.stringify(params)}`); // В тестовому режимі отрдер умовно створюється і данні виводяться в консоль
+    log(`Отримана відповідь: ${JSON.stringify(response.data)}`); // В тестовому режимі відповідь не надється бо реально ордер не виконується
     return response.data;
   } catch (error) {
     logError(`Помилка під час створення ордеру: ${error.message}`);

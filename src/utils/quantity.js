@@ -37,5 +37,8 @@ export const getStepSize = async (symbol) => {
 
 export const roundToStepSize = (quantity, stepSize) => {
   const precision = Math.log10(1 / stepSize); // Кількість знаків після коми
-  return parseFloat(quantity.toFixed(precision));
+  const factor = Math.pow(10, precision); // Фактор для множення
+
+  // Округлення вниз до найближчого кратного stepSize
+  return Math.floor(quantity * factor) / factor;
 };

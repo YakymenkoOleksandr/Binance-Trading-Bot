@@ -53,7 +53,6 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
       workingСapital,
       prices[pair.first.symbol]
     );
-    log();
     //  `Перевірка балансу для ${pair.first.symbol}, кількість: ${firstAmount}`
     const isFirstBalanceEnough = await checkBalance(
       pair.first.symbol.split("USDT")[0],
@@ -110,6 +109,10 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     log(`Продано ${finalOrder.amount || secondAmount} ${sellPair}`);
 
     // Розрахунок прибутку
+    // console.log(finalOrder, workingСapital);
+    
+    
+    
     const totalProfit = finalOrder.amount - workingСapital;
     log(`Прибуток: ${totalProfit.toFixed(2)} USDT`);
 
@@ -132,7 +135,7 @@ const handlePricesUpdate = (updatedPrices) => {
 
   if (profitablePairs.length > 0) {
     const mostProfitablePair = profitablePairs[0]; // Беремо найвигіднішу пару
-    const workingСapital = 15; // Початковий капітал для арбітражу
+    const workingСapital = 100; // Початковий капітал для арбітражу
     executeArbitrage(mostProfitablePair, prices, workingСapital);
   } else {
     // log("Немає вигідних пар для арбітражу.");
