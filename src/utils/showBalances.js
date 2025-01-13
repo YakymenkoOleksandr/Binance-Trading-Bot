@@ -30,7 +30,7 @@ export const checkUSDTBalance = async (capital) => {
       );
     }
 
-    log(`Баланс USDT достатній: ${usdtBalance.free} доступно.`);
+  //  log(`Баланс USDT достатній: ${usdtBalance.free} доступно.`);
     return true;
   } catch (error) {
     logError(`Помилка при перевірці балансу USDT: ${error.message}`);

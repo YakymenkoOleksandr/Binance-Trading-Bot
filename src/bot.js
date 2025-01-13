@@ -2,7 +2,11 @@ import { connectWebSocket } from "./services/websocket.js";
 import { calculateArbitrageProfit } from "./strategies/arbitrage.js";
 import { createOrder, getBalances } from "./services/binanceAPI.js";
 import { log, logError } from "./services/logger.js";
-import { checkBalance, checkUSDTBalance, waitForBalanceUpdate } from "./utils/showBalances.js";
+import {
+  checkBalance,
+  checkUSDTBalance,
+  waitForBalanceUpdate,
+} from "./utils/showBalances.js";
 
 let lastLogTime = 0; // Час останнього логування про очікування
 const LOG_INTERVAL = 5000; // Інтервал в мілісекундах (наприклад, 5 секунд)
@@ -10,21 +14,26 @@ const LOG_INTERVAL = 5000; // Інтервал в мілісекундах (на
 const prices = {}; // Кеш для цін
 let isExecutingArbitrage = false; // Прапорець виконання
 
-const calculateAmount = (capital, price) => {
+const calculateAmount = (capital, price, feeRate = 0.001) => {
   if (!capital || !price || price <= 0) {
     throw new Error(
       `Неможливо обчислити кількість монет: capital=${capital}, price=${price}`
     );
   }
-  return capital / price;
+
+  const amount = capital / price; // Обчислення кількості монет без врахування комісії
+
+  // Вираховуємо комісію і віднімаємо від кількості монет
+  const amountAfterFee = amount * (1 - feeRate);
+
+  return amountAfterFee;
 };
 
-
 const executeArbitrage = async (pair, prices, workingСapital) => {
-   if (isExecutingArbitrage) {
+  if (isExecutingArbitrage) {
     const currentTime = Date.now();
     if (currentTime - lastLogTime > LOG_INTERVAL) {
-      log("Арбітраж вже виконується, очікування завершення...");
+      //  log("Арбітраж вже виконується, очікування завершення...");
       lastLogTime = currentTime;
     }
     return; // Чекаємо, поки поточний цикл завершиться
@@ -35,7 +44,7 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     log(`Старт арбітражу для пари ${pair.pairName}`);
 
     // Перевіряємо баланс на USDT
-    log("Перевірка балансу USDT...");
+    // log("Перевірка балансу USDT...");
     const isUSDTBalanceEnough = await checkUSDTBalance(workingСapital);
     if (!isUSDTBalanceEnough) return; // Перериваємо арбітраж, якщо коштів USDT недостатньо
 
@@ -44,10 +53,12 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
       workingСapital,
       prices[pair.first.symbol]
     );
-    log(
-      `Перевірка балансу для ${pair.first.symbol}, кількість: ${firstAmount}`
+    log();
+    //  `Перевірка балансу для ${pair.first.symbol}, кількість: ${firstAmount}`
+    const isFirstBalanceEnough = await checkBalance(
+      pair.first.symbol.split("USDT")[0],
+      firstAmount
     );
-    const isFirstBalanceEnough = await checkBalance(pair.first.symbol.split("USDT")[0], firstAmount);
     if (!isFirstBalanceEnough) return; // Перериваємо арбітраж, якщо коштів недостатньо
 
     // Купівля першої валюти за USDT
@@ -58,16 +69,16 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     log(`Куплено ${firstOrder.amount || firstAmount} ${pair.first.symbol}`);
 
     // Очікуємо оновлення балансу першої валюти
-    const isFirstBalanceUpdated = await waitForBalanceUpdate(
+    /*const isFirstBalanceUpdated = await waitForBalanceUpdate(
       pair.first.symbol,
       firstAmount
     );
-    if (!isFirstBalanceUpdated) return; // Перериваємо арбітраж, якщо баланс не оновився
+    if (!isFirstBalanceUpdated) return; // Перериваємо арбітраж, якщо баланс не оновився*/
 
     // Обчислення кількості монет для другої валюти
     const secondAmount = calculateAmount(
       firstAmount,
-      1 / prices[pair.second.symbol]
+      prices[pair.second.symbol]
     );
     log(`Обчислено secondAmount: ${secondAmount}`);
 
@@ -83,18 +94,20 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     log(`Куплено ${secondOrder.amount || secondAmount} ${pair.second.symbol}`);
 
     // Очікуємо оновлення балансу другої валюти
-    const isSecondBalanceUpdated = await waitForBalanceUpdate(
+    /*const isSecondBalanceUpdated = await waitForBalanceUpdate(
       pair.second.symbol,
       secondAmount
     );
-    if (!isSecondBalanceUpdated) return; // Перериваємо арбітраж, якщо баланс не оновився
+    if (!isSecondBalanceUpdated) return; // Перериваємо арбітраж, якщо баланс не оновився*/
 
     // Продаж другої валюти за USDT
-    log(
-      `Створення ордеру для продажу ${pair.second.symbol} на суму ${secondAmount}`
-    );
-    const finalOrder = await createOrder("USDT", "SELL", secondAmount);
-    log(`Продано ${finalOrder.amount || secondAmount} USDT`);
+    const sellPair = `${pair.second.symbol.replace(
+      pair.first.symbol.split("USDT")[0],
+      ""
+    )}USDT`;
+
+    const finalOrder = await createOrder(sellPair, "SELL", secondAmount);
+    log(`Продано ${finalOrder.amount || secondAmount} ${sellPair}`);
 
     // Розрахунок прибутку
     const totalProfit = finalOrder.amount - workingСapital;
@@ -122,7 +135,7 @@ const handlePricesUpdate = (updatedPrices) => {
     const workingСapital = 15; // Початковий капітал для арбітражу
     executeArbitrage(mostProfitablePair, prices, workingСapital);
   } else {
-    log("Немає вигідних пар для арбітражу.");
+    // log("Немає вигідних пар для арбітражу.");
   }
 };
 
