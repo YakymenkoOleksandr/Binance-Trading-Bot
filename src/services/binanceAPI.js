@@ -51,6 +51,9 @@ export const createOrder = async (symbol, side, quantity) => {
     };
 
     const signature = sign(params, apiSecret);
+
+    // Логування заголовків
+    log(`Заголовки запиту: ${JSON.stringify(params)}`);
     
 
     const response = await axios.post(`${baseUrl}/api/v3/order/test`, null, {
@@ -62,7 +65,14 @@ export const createOrder = async (symbol, side, quantity) => {
     log(`Отримана відповідь: ${JSON.stringify(response.data)}`); // В тестовому режимі відповідь не надється бо реально ордер не виконується
     return response.data;
   } catch (error) {
-    logError(`Помилка під час створення ордеру: ${error.message}`);
-    throw error;
+      // Перевіряємо, чи є відповідь з детальною інформацією
+    if (error.response) {
+      logError(`Помилка API: ${JSON.stringify(error.response.data)}`); // Виводимо деталі помилки з відповіді API
+    } else if (error.request) {
+      logError(`Запит не отримав відповіді: ${JSON.stringify(error.request)}`);
+    } else {
+      logError(`Помилка налаштування запиту: ${error.message}`);
+    }
+    throw error; // Пробрасываем ошибку дальше
   }
 };

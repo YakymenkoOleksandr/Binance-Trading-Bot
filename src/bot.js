@@ -14,7 +14,7 @@ const LOG_INTERVAL = 5000; // Інтервал в мілісекундах (на
 const prices = {}; // Кеш для цін
 let isExecutingArbitrage = false; // Прапорець виконання
 
-const calculateAmount = (capital, price, feeRate = 0.001) => {
+const calculateAmountFirst = (capital, price, feeRate = 0.001) => {
   if (!capital || !price || price <= 0) {
     throw new Error(
       `Неможливо обчислити кількість монет: capital=${capital}, price=${price}`
@@ -25,6 +25,51 @@ const calculateAmount = (capital, price, feeRate = 0.001) => {
 
   // Вираховуємо комісію і віднімаємо від кількості монет
   const amountAfterFee = amount * (1 - feeRate);
+
+  return amountAfterFee;
+};
+
+const calculateAmountSecond = (
+  firstAmount,
+  price,
+  firstSymbol,
+  secondSymbol,
+  feeRate = 0.001
+) => {
+  if (!firstAmount || !price || price <= 0) {
+    throw new Error(
+      `Неможливо обчислити кількість монет: capital=${firstAmount}, price=${price}`
+    );
+  }
+
+  let amountAfterFee;
+
+  // Визначаємо, чи це перевернута пара
+  if (
+    firstSymbol !== "BTCUSDT" &&
+    firstSymbol !== "ETHUSDT" &&
+    firstSymbol !== "BNBUSDT"
+  ) {
+    // Перевернута пара: X → BTC, ETH, BNB (множимо)
+    amountAfterFee = firstAmount * price * (1 - feeRate); // Множимо на ціну для перевернутої пари
+  } else if (firstSymbol === "ETHUSDT" && secondSymbol === "ETHBTC") {
+    amountAfterFee = firstAmount * price * (1 - feeRate); // Множимо на ціну для перевернутої пари
+  } else if (firstSymbol === "ETHUSDT" && secondSymbol === "ETHDAI") {
+    amountAfterFee = firstAmount * price * (1 - feeRate); // Множимо на ціну для перевернутої пари
+  } else if (firstSymbol === "BNBUSDT" && secondSymbol === "BNBETH") {
+    amountAfterFee = firstAmount * price * (1 - feeRate); // Множимо на ціну для перевернутої пари
+  } else if (firstSymbol === "BNBUSDT" && secondSymbol === "BNBBTC") {
+    amountAfterFee = firstAmount * price * (1 - feeRate); // Множимо на ціну для перевернутої пари
+  } else if (firstSymbol === "SHIB" && secondSymbol === "DOGE") {
+    amountAfterFee = firstAmount * price * (1 - feeRate); // Множимо на ціну для перевернутої пари
+  } else if (firstSymbol === "DAIUSDT" && secondSymbol === "BTCDAI") {
+    amountAfterFee = (firstAmount / price) * (1 - feeRate); // Ділимо на ціну для прямої пари
+  } else if (firstSymbol === "DAIUSDT" && secondSymbol === "ETHDAI") {
+    amountAfterFee = (firstAmount / price) * (1 - feeRate); // Ділимо на ціну для прямої пари
+  } else {
+    // Пряма пара: BTC, ETH, BNB → X (ділимо)
+    amountAfterFee = (firstAmount / price) * (1 - feeRate); // Ділимо на ціну для прямої пари
+  }
 
   return amountAfterFee;
 };
@@ -49,10 +94,11 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     if (!isUSDTBalanceEnough) return; // Перериваємо арбітраж, якщо коштів USDT недостатньо
 
     // Перевірка балансу першої валюти
-    const firstAmount = calculateAmount(
+    const firstAmount = calculateAmountFirst(
       workingСapital,
       prices[pair.first.symbol]
     );
+
     //  `Перевірка балансу для ${pair.first.symbol}, кількість: ${firstAmount}`
     const isFirstBalanceEnough = await checkBalance(
       pair.first.symbol.split("USDT")[0],
@@ -72,9 +118,11 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     if (!isFirstBalanceUpdated) return; // Перериваємо арбітраж, якщо баланс не оновився*/
 
     // Обчислення кількості монет для другої валюти
-    const secondAmount = calculateAmount(
+    const secondAmount = calculateAmountSecond(
       firstAmount,
-      prices[pair.second.symbol]
+      prices[pair.second.symbol],
+      pair.first.symbol, // Перший символ для визначення типу пари
+      pair.second.symbol // Другий символ для визначення типу пари
     );
     log(`Обчислено secondAmount: ${secondAmount}`);
 
@@ -104,9 +152,7 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
 
     // Розрахунок прибутку
     // console.log(finalOrder, workingСapital);
-    
-    
-    
+
     const totalProfit = finalOrder.amount - workingСapital;
     log(`Прибуток: ${totalProfit.toFixed(2)} USDT`);
 
