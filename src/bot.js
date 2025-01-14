@@ -61,9 +61,6 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     if (!isFirstBalanceEnough) return; // Перериваємо арбітраж, якщо коштів недостатньо
 
     // Купівля першої валюти за USDT
-    log(
-      `Створення ордеру для купівлі ${pair.first.symbol} з кількістю ${firstAmount}`
-    );
     const firstOrder = await createOrder(pair.first.symbol, "BUY", firstAmount);
     log(`Куплено ${firstOrder.amount || firstAmount} ${pair.first.symbol}`);
 
@@ -82,9 +79,6 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     log(`Обчислено secondAmount: ${secondAmount}`);
 
     // Купівля другої валюти за першу валюту
-    log(
-      `Створення ордеру для купівлі ${pair.second.symbol} з кількістю ${secondAmount}`
-    );
     const secondOrder = await createOrder(
       pair.second.symbol,
       "BUY",

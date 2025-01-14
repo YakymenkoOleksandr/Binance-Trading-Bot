@@ -2,7 +2,7 @@
 export function calculateProfit({ workingСapital, pricesFirstCoin, pricesCoinToCoin, pricesSecondCoin }) {
   
   // Функція для обчислення суми після вирахування комісії
-  const deductCommission = (amount) => amount - amount * 0.00075;
+  const deductCommission = (amount) => amount - amount * 0.001;
   
   // Розрахунки
   const amountAfterFirstTrade = deductCommission(workingСapital) / pricesFirstCoin; // Купівля першої монети за USDT
