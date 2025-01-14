@@ -51,6 +51,7 @@ export const createOrder = async (symbol, side, quantity) => {
     };
 
     const signature = sign(params, apiSecret);
+    
 
     const response = await axios.post(`${baseUrl}/api/v3/order/test`, null, {
       headers: { 'X-MBX-APIKEY': apiKey },
