@@ -50,19 +50,26 @@ const calculateAmountSecond = (
   ) {
     // Перевернута пара: X → BTC, ETH, BNB (множимо)
     amountAfterFee = firstAmount * (1 - feeRate) * price; // Множимо на ціну для перевернутої пари
-  } else if (firstSymbol === "ETHUSDT" && secondSymbol === "ETHBTC") {
+  }
+  else if (firstSymbol === "ETHUSDT" && secondSymbol === "ETHBTC") {
     amountAfterFee = firstAmount * (1 - feeRate) * price; // Множимо на ціну для перевернутої пари
-  } else if (firstSymbol === "ETHUSDT" && secondSymbol === "ETHDAI") {
+  }
+  else if (firstSymbol === "ETHUSDT" && secondSymbol === "ETHDAI") {
     amountAfterFee = firstAmount * (1 - feeRate) * price; // Множимо на ціну для перевернутої пари
-  } else if (firstSymbol === "BNBUSDT" && secondSymbol === "BNBETH") {
+  }
+  else if (firstSymbol === "BNBUSDT" && secondSymbol === "BNBETH") {
     amountAfterFee = firstAmount * (1 - feeRate) * price; // Множимо на ціну для перевернутої пари
-  } else if (firstSymbol === "BNBUSDT" && secondSymbol === "BNBBTC") {
+  }
+  else if (firstSymbol === "BNBUSDT" && secondSymbol === "BNBBTC") {
     amountAfterFee = firstAmount * (1 - feeRate) * price; // Множимо на ціну для перевернутої пари
-  } else if (firstSymbol === "SHIB" && secondSymbol === "DOGE") {
+  }
+  else if (firstSymbol === "SHIB" && secondSymbol === "DOGE") {
     amountAfterFee = firstAmount * (1 - feeRate) * price; // Множимо на ціну для перевернутої пари
-  } else if (firstSymbol === "DAIUSDT" && secondSymbol === "BTCDAI") {
+  }
+  else if (firstSymbol === "DAIUSDT" && secondSymbol === "BTCDAI") {
     amountAfterFee = firstAmount * (1 - feeRate) * price; // Ділимо на ціну для прямої пари
-  } else if (firstSymbol === "DAIUSDT" && secondSymbol === "ETHDAI") {
+  }
+  else if (firstSymbol === "DAIUSDT" && secondSymbol === "ETHDAI") {
     amountAfterFee = firstAmount * (1 - feeRate) * price; // Ділимо на ціну для прямої пари
   } else {
     // Пряма пара: BTC, ETH, BNB → X (ділимо)
@@ -128,21 +135,26 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     // Продаж першої валюти для купівлі другої
     
     // Для прямої пари
-   if (pair.first.symbol === "BTCUSDT" || pair.first.symbol === "ETHUSDT" || pair.first.symbol === "BNBUSDT" ) {
-      const secondOrderBuy = await createOrder(pair.second.symbol, "BUY",secondAmount);
-    } else if (firstSymbol === "DAIUSDT" && secondSymbol === "BTCDAI") {
+    if (pair.first.symbol === "BTCUSDT" || pair.first.symbol === "ETHUSDT" || pair.first.symbol === "BNBUSDT") {
+     
+      const secondOrderBuy = await createOrder(pair.second.symbol, "BUY", secondAmount);
+      
+    } else if (pair.first.symbol === "DAIUSDT" && pair.second.symbol === "BTCDAI") {
     const secondOrderBuy = await createOrder(pair.second.symbol, "BUY", secondAmount); // Виключення пряма пара
-    } else if (firstSymbol === "DAIUSDT" && secondSymbol === "ETHDAI") {
-    const secondOrderBuy = await createOrder(pair.second.symbol, "BUY", secondAmount); // Виключення пряма пара
-    } else if (firstSymbol === "ETHUSDT" && secondSymbol === "ETHBTC") {
+    } else if (pair.first.symbol === "DAIUSDT" && pair.second.symbol === "ETHDAI") {
+      const secondOrderBuy = await createOrder(pair.second.symbol, "BUY", secondAmount); // Виключення пряма пара
+      
+    } else if (pair.first.symbol === "ETHUSDT" && pair.second.symbol === "ETHBTC") {
+      const secondOrderSell = await createOrder(pair.second.symbol, "SELL", firstAmount); // Виключення перевернута пара
+    }
+    
+    else if (pair.first.symbol === "ETHUSDT" && pair.second.symbol === "ETHDAI") {
     const secondOrderSell = await createOrder(pair.second.symbol, "SELL", firstAmount); // Виключення перевернута пара
-    } else if (firstSymbol === "ETHUSDT" && secondSymbol === "ETHDAI") {
+    } else if (pair.first.symbol === "BNBUSDT" && pair.second.symbol === "BNBETH") {
     const secondOrderSell = await createOrder(pair.second.symbol, "SELL", firstAmount); // Виключення перевернута пара
-    } else if (firstSymbol === "BNBUSDT" && secondSymbol === "BNBETH") {
+    } else if (pair.first.symbol === "BNBUSDT" && pair.second.symbol === "BNBBTC") {
     const secondOrderSell = await createOrder(pair.second.symbol, "SELL", firstAmount); // Виключення перевернута пара
-    } else if (firstSymbol === "BNBUSDT" && secondSymbol === "BNBBTC") {
-    const secondOrderSell = await createOrder(pair.second.symbol, "SELL", firstAmount); // Виключення перевернута пара
-    } else if (firstSymbol === "SHIB" && secondSymbol === "DOGE") {
+    } else if (pair.first.symbol === "SHIB" && pair.second.symbol === "DOGE") {
     const secondOrderSell = await createOrder(pair.second.symbol, "SELL", firstAmount); // Виключення перевернута пара
     } else {
       // Для перевернутої пари
