@@ -126,13 +126,17 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     );
     log(`Обчислено secondAmount: ${secondAmount}`);
 
-    // Купівля другої валюти за першу валюту
+    console.log(pair.second.symbol);
+    
+
+    // Продаж першої валюти для купівлі другої
     const secondOrder = await createOrder(
       pair.second.symbol,
-      "BUY",
-      secondAmount
+      "SELL",
+      firstAmount
     );
     log(`Куплено ${secondOrder.amount || secondAmount} ${pair.second.symbol}`);
+    
 
     // Очікуємо оновлення балансу другої валюти
     /*const isSecondBalanceUpdated = await waitForBalanceUpdate(
