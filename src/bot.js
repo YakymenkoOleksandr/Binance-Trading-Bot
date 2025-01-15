@@ -2,11 +2,7 @@ import { connectWebSocket } from "./services/websocket.js";
 import { calculateArbitrageProfit } from "./strategies/arbitrage.js";
 import { createOrder, getBalances } from "./services/binanceAPI.js";
 import { log, logError } from "./services/logger.js";
-import {
-  checkBalance,
-  checkUSDTBalance,
-  waitForBalanceUpdate,
-} from "./utils/showBalances.js";
+import {checkBalance, checkUSDTBalance, waitForBalanceUpdate} from "./utils/showBalances.js";
 import { getBNBBalance } from "./utils/getBNBBalance.js";
 
 let lastLogTime = 0; // Час останнього логування про очікування
