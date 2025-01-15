@@ -32,7 +32,6 @@ const calculateAmountSecond = (
   price,
   firstSymbol,
   secondSymbol,
-  feeRate = 0.00075
 ) => {
   if (!firstAmount || !price || price <= 0) {
     throw new Error(
@@ -40,7 +39,7 @@ const calculateAmountSecond = (
     );
   }
 
-  let amountAfterFee;
+  let amount;
 
   // Визначаємо, чи це перевернута пара
   if (
@@ -49,34 +48,34 @@ const calculateAmountSecond = (
     firstSymbol !== "BNBUSDT"
   ) {
     // Перевернута пара: X → BTC, ETH, BNB (множимо)
-    amountAfterFee = firstAmount * (1 - feeRate) * price; // Множимо на ціну для перевернутої пари
+    amount = firstAmount * price; // Множимо на ціну для перевернутої пари
   }
   else if (firstSymbol === "ETHUSDT" && secondSymbol === "ETHBTC") {
-    amountAfterFee = firstAmount * (1 - feeRate) * price; // Множимо на ціну для перевернутої пари
+    amount = firstAmount * price; // Множимо на ціну для перевернутої пари
   }
   else if (firstSymbol === "ETHUSDT" && secondSymbol === "ETHDAI") {
-    amountAfterFee = firstAmount * (1 - feeRate) * price; // Множимо на ціну для перевернутої пари
+    amount = firstAmount * price; // Множимо на ціну для перевернутої пари
   }
   else if (firstSymbol === "BNBUSDT" && secondSymbol === "BNBETH") {
-    amountAfterFee = firstAmount * (1 - feeRate) * price; // Множимо на ціну для перевернутої пари
+    amount = firstAmount * price; // Множимо на ціну для перевернутої пари
   }
   else if (firstSymbol === "BNBUSDT" && secondSymbol === "BNBBTC") {
-    amountAfterFee = firstAmount * (1 - feeRate) * price; // Множимо на ціну для перевернутої пари
+    amount = firstAmount * price; // Множимо на ціну для перевернутої пари
   }
   else if (firstSymbol === "SHIB" && secondSymbol === "DOGE") {
-    amountAfterFee = firstAmount * (1 - feeRate) * price; // Множимо на ціну для перевернутої пари
+    amount = firstAmount * price; // Множимо на ціну для перевернутої пари
   }
   else if (firstSymbol === "DAIUSDT" && secondSymbol === "BTCDAI") {
-    amountAfterFee = firstAmount * (1 - feeRate) * price; // Ділимо на ціну для прямої пари
+    amount = firstAmount * price; // Ділимо на ціну для прямої пари
   }
   else if (firstSymbol === "DAIUSDT" && secondSymbol === "ETHDAI") {
-    amountAfterFee = firstAmount * (1 - feeRate) * price; // Ділимо на ціну для прямої пари
+    amount = firstAmount * price; // Ділимо на ціну для прямої пари
   } else {
     // Пряма пара: BTC, ETH, BNB → X (ділимо)
-    amountAfterFee = (firstAmount * (1 - feeRate)) / price; // Ділимо на ціну для прямої пари
+    amount = firstAmount  / price; // Ділимо на ціну для прямої пари
   }
 
-  return amountAfterFee;
+  return amount;
 };
 
 const executeArbitrage = async (pair, prices, workingСapital) => {
@@ -133,32 +132,34 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     );
 
     // Продаж першої валюти для купівлі другої
-    
     // Для прямої пари
-    if (pair.first.symbol === "BTCUSDT" || pair.first.symbol === "ETHUSDT" || pair.first.symbol === "BNBUSDT") {
-     
-      const secondOrderBuy = await createOrder(pair.second.symbol, "BUY", secondAmount);
-      
-    } else if (pair.first.symbol === "DAIUSDT" && pair.second.symbol === "BTCDAI") {
+    if (pair.first.symbol !== "BTCUSDT" && pair.first.symbol !== "ETHUSDT" && pair.first.symbol !== "BNBUSDT") {
+      // Для перевернутої пари
+      const secondOrderSell = await createOrder(pair.second.symbol, "SELL", firstAmount);
+    }
+    else if (pair.first.symbol === "DAIUSDT" && pair.second.symbol === "BTCDAI") {
     const secondOrderBuy = await createOrder(pair.second.symbol, "BUY", secondAmount); // Виключення пряма пара
-    } else if (pair.first.symbol === "DAIUSDT" && pair.second.symbol === "ETHDAI") {
-      const secondOrderBuy = await createOrder(pair.second.symbol, "BUY", secondAmount); // Виключення пряма пара
-      
+    }
+    else if (pair.first.symbol === "DAIUSDT" && pair.second.symbol === "ETHDAI") {
+      const secondOrderBuy = await createOrder(pair.second.symbol, "BUY", secondAmount); // Виключення пряма пара   
     } else if (pair.first.symbol === "ETHUSDT" && pair.second.symbol === "ETHBTC") {
       const secondOrderSell = await createOrder(pair.second.symbol, "SELL", firstAmount); // Виключення перевернута пара
     }
-    
     else if (pair.first.symbol === "ETHUSDT" && pair.second.symbol === "ETHDAI") {
     const secondOrderSell = await createOrder(pair.second.symbol, "SELL", firstAmount); // Виключення перевернута пара
-    } else if (pair.first.symbol === "BNBUSDT" && pair.second.symbol === "BNBETH") {
+    }
+    else if (pair.first.symbol === "BNBUSDT" && pair.second.symbol === "BNBETH") {
     const secondOrderSell = await createOrder(pair.second.symbol, "SELL", firstAmount); // Виключення перевернута пара
-    } else if (pair.first.symbol === "BNBUSDT" && pair.second.symbol === "BNBBTC") {
+    }
+    else if (pair.first.symbol === "BNBUSDT" && pair.second.symbol === "BNBBTC") {
     const secondOrderSell = await createOrder(pair.second.symbol, "SELL", firstAmount); // Виключення перевернута пара
-    } else if (pair.first.symbol === "SHIB" && pair.second.symbol === "DOGE") {
+    }
+    else if (pair.first.symbol === "SHIB" && pair.second.symbol === "DOGE") {
     const secondOrderSell = await createOrder(pair.second.symbol, "SELL", firstAmount); // Виключення перевернута пара
-    } else {
-      // Для перевернутої пари
-      const secondOrderSell = await createOrder(pair.second.symbol, "SELL", firstAmount);
+    }
+    else {
+      // Для прямої пари
+      const secondOrderBuy = await createOrder(pair.second.symbol, "BUY", secondAmount);
     }
 
     // Очікуємо оновлення балансу другої валюти
@@ -175,14 +176,14 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     )}USDT`;
 
     // Вирахування комісії з після виконання другого ордеру
-    let thirdAmount = secondAmount * (1 - 0.00075);
+    let thirdAmount = secondAmount;
 
     // Третій ордер обміну другої валюти на USDT
     const finalOrder = await createOrder(sellPair, "SELL", thirdAmount);
 
     // Розрахунок прибутку
     const totalProfit =
-      finalOrder.amount * (1 - 0.00075) -
+      finalOrder.amount -
       firstAmount * prices[pair.first.symbol];
     // log(`Прибуток після комісії: ${totalProfit.toFixed(2)} USDT`);
 
