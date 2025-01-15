@@ -10,7 +10,6 @@ export const checkBalance = async (symbol, amount) => {
       throw new Error(`Недостатньо коштів для виконання ордеру: ${symbol}`);
     }
 
-    log(`Баланс для ${symbol} достатній: ${balance.free} доступно.`);
     return true;
   } catch (error) {
     logError(`Помилка при перевірці балансу: ${error.message}`);
@@ -59,7 +58,6 @@ export const waitForBalanceUpdate = async (
     const balance = balances.find((b) => b.asset === symbol);
 
     if (balance && parseFloat(balance.free) >= (initialBalance + expectedAmount)) {
-      log(`Баланс для ${symbol} оновлено: ${balance.free} доступно.`);
       return true; // Баланс оновлено
     }
 

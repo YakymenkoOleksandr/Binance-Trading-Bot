@@ -35,12 +35,9 @@ export const createOrder = async (symbol, side, quantity) => {
     );
   }
 
-
   try {
     // Отримуємо stepSize
     const stepSize = await getStepSize(symbol);
-
-
 
     // Округлюємо кількість
     const roundedQuantity = roundToStepSize(quantity, stepSize);
@@ -54,11 +51,7 @@ export const createOrder = async (symbol, side, quantity) => {
     };
 
     const signature = sign(params, apiSecret);
-
-    // Логування заголовків
-    log(`Заголовки запиту: ${JSON.stringify(params)}`);
     
-
     const response = await axios.post(`${baseUrl}/api/v3/order/test`, null, {
       headers: { 'X-MBX-APIKEY': apiKey },
       params: { ...params, signature },

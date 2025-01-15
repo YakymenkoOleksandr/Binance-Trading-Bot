@@ -7,6 +7,7 @@ import {
   checkUSDTBalance,
   waitForBalanceUpdate,
 } from "./utils/showBalances.js";
+import { getBNBBalance } from "./utils/getBNBBalance.js";
 
 let lastLogTime = 0; // Час останнього логування про очікування
 const LOG_INTERVAL = 5000; // Інтервал в мілісекундах (наприклад, 5 секунд)
@@ -31,7 +32,7 @@ const calculateAmountSecond = (
   price,
   firstSymbol,
   secondSymbol,
-  feeRate = 0.001
+  feeRate = 0.00075
 ) => {
   if (!firstAmount || !price || price <= 0) {
     throw new Error(
@@ -84,6 +85,11 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
   isExecutingArbitrage = true; // Встановлюємо прапорець
   try {
     log(`Старт арбітражу для пари ${pair.pairName}`);
+
+    // Отримуємо значення балансу BNB
+    getBNBBalance();
+
+
 
     // Перевіряємо баланс на USDT
     // log("Перевірка балансу USDT...");
@@ -142,13 +148,13 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     )}USDT`;
     
     // Вирахування комісії з після виконання другого ордеру
-    let thirdAmount =  secondAmount * (1 - 0.001)
+    let thirdAmount =  secondAmount * (1 - 0.00075)
 
     // Третій ордер обміну другої валюти на USDT
     const finalOrder = await createOrder(sellPair, "SELL", thirdAmount);
 
     // Розрахунок прибутку
-    const totalProfit = (finalOrder.amount * (1 - 0.001))  - firstAmount * prices[pair.first.symbol];
+    const totalProfit = (finalOrder.amount * (1 - 0.00075))  - firstAmount * prices[pair.first.symbol];
     // log(`Прибуток після комісії: ${totalProfit.toFixed(2)} USDT`);
 
     if (totalProfit < 0) {
