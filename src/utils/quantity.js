@@ -28,6 +28,7 @@ export const getStepSize = async (symbol) => {
       );
     }
 
+    
     return parseFloat(lotSizeFilter.stepSize);
   } catch (error) {
     logError(`Помилка під час отримання stepSize: ${error.message}`);
@@ -36,6 +37,7 @@ export const getStepSize = async (symbol) => {
 };
 
 export const roundToStepSize = (quantity, stepSize) => {
+  
   const precision = Math.log10(1 / stepSize); // Кількість знаків після коми
   const factor = Math.pow(10, precision); // Фактор для множення
 
