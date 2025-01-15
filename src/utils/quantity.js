@@ -28,8 +28,6 @@ export const getStepSize = async (symbol) => {
       );
     }
 
-    console.log("Пара ", symbol, "округляється до ", lotSizeFilter.stepSize);
-
     return parseFloat(lotSizeFilter.stepSize);
   } catch (error) {
     logError(`Помилка під час отримання stepSize: ${error.message}`);

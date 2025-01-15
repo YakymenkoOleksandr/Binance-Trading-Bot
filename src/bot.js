@@ -14,7 +14,7 @@ const LOG_INTERVAL = 5000; // Інтервал в мілісекундах (на
 const prices = {}; // Кеш для цін
 let isExecutingArbitrage = false; // Прапорець виконання
 
-const calculateAmountFirst = (capital, price, feeRate = 0.001) => {
+const calculateAmountFirst = (capital, price) => {
   if (!capital || !price || price <= 0) {
     throw new Error(
       `Неможливо обчислити кількість монет: capital=${capital}, price=${price}`
@@ -23,10 +23,7 @@ const calculateAmountFirst = (capital, price, feeRate = 0.001) => {
 
   const amount = capital / price; // Обчислення кількості монет без врахування комісії
 
-  // Вираховуємо комісію і віднімаємо від кількості монет
-  const amountAfterFee = amount * (1 - feeRate);
-
-  return amountAfterFee;
+  return amount;
 };
 
 const calculateAmountSecond = (
@@ -51,24 +48,24 @@ const calculateAmountSecond = (
     firstSymbol !== "BNBUSDT"
   ) {
     // Перевернута пара: X → BTC, ETH, BNB (множимо)
-    amountAfterFee = firstAmount * price * (1 - feeRate); // Множимо на ціну для перевернутої пари
+    amountAfterFee = (firstAmount * (1 - feeRate)) * price; // Множимо на ціну для перевернутої пари
   } else if (firstSymbol === "ETHUSDT" && secondSymbol === "ETHBTC") {
-    amountAfterFee = firstAmount * price * (1 - feeRate); // Множимо на ціну для перевернутої пари
+    amountAfterFee = (firstAmount * (1 - feeRate)) * price; // Множимо на ціну для перевернутої пари
   } else if (firstSymbol === "ETHUSDT" && secondSymbol === "ETHDAI") {
-    amountAfterFee = firstAmount * price * (1 - feeRate); // Множимо на ціну для перевернутої пари
+    amountAfterFee = (firstAmount * (1 - feeRate)) * price; // Множимо на ціну для перевернутої пари
   } else if (firstSymbol === "BNBUSDT" && secondSymbol === "BNBETH") {
-    amountAfterFee = firstAmount * price * (1 - feeRate); // Множимо на ціну для перевернутої пари
+    amountAfterFee = (firstAmount * (1 - feeRate)) * price; // Множимо на ціну для перевернутої пари
   } else if (firstSymbol === "BNBUSDT" && secondSymbol === "BNBBTC") {
-    amountAfterFee = firstAmount * price * (1 - feeRate); // Множимо на ціну для перевернутої пари
+    amountAfterFee = (firstAmount * (1 - feeRate)) * price; // Множимо на ціну для перевернутої пари
   } else if (firstSymbol === "SHIB" && secondSymbol === "DOGE") {
-    amountAfterFee = firstAmount * price * (1 - feeRate); // Множимо на ціну для перевернутої пари
+    amountAfterFee = (firstAmount * (1 - feeRate)) * price; // Множимо на ціну для перевернутої пари
   } else if (firstSymbol === "DAIUSDT" && secondSymbol === "BTCDAI") {
-    amountAfterFee = (firstAmount / price) * (1 - feeRate); // Ділимо на ціну для прямої пари
+    amountAfterFee = (firstAmount * (1 - feeRate)) * price; // Ділимо на ціну для прямої пари
   } else if (firstSymbol === "DAIUSDT" && secondSymbol === "ETHDAI") {
-    amountAfterFee = (firstAmount / price) * (1 - feeRate); // Ділимо на ціну для прямої пари
+    amountAfterFee = (firstAmount * (1 - feeRate)) * price; // Ділимо на ціну для прямої пари
   } else {
     // Пряма пара: BTC, ETH, BNB → X (ділимо)
-    amountAfterFee = (firstAmount / price) * (1 - feeRate); // Ділимо на ціну для прямої пари
+    amountAfterFee = (firstAmount * (1 - feeRate)) / price; // Ділимо на ціну для прямої пари
   }
 
   return amountAfterFee;
@@ -108,7 +105,6 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
 
     // Купівля першої валюти за USDT
     const firstOrder = await createOrder(pair.first.symbol, "BUY", firstAmount);
-    log(`Куплено ${firstOrder.amount || firstAmount} ${pair.first.symbol}`);
 
     // Очікуємо оновлення балансу першої валюти
     /*const isFirstBalanceUpdated = await waitForBalanceUpdate(
@@ -124,10 +120,6 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
       pair.first.symbol, // Перший символ для визначення типу пари
       pair.second.symbol // Другий символ для визначення типу пари
     );
-    log(`Обчислено secondAmount: ${secondAmount}`);
-
-    console.log(pair.second.symbol);
-    
 
     // Продаж першої валюти для купівлі другої
     const secondOrder = await createOrder(
@@ -135,8 +127,6 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
       "SELL",
       firstAmount
     );
-    log(`Куплено ${secondOrder.amount || secondAmount} ${pair.second.symbol}`);
-    
 
     // Очікуємо оновлення балансу другої валюти
     /*const isSecondBalanceUpdated = await waitForBalanceUpdate(
@@ -150,15 +140,16 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
       pair.first.symbol.split("USDT")[0],
       ""
     )}USDT`;
+    
+    // Вирахування комісії з після виконання другого ордеру
+    let thirdAmount =  secondAmount * (1 - 0.001)
 
-    const finalOrder = await createOrder(sellPair, "SELL", secondAmount);
-    log(`Продано ${finalOrder.amount || secondAmount} ${sellPair}`);
+    // Третій ордер обміну другої валюти на USDT
+    const finalOrder = await createOrder(sellPair, "SELL", thirdAmount);
 
     // Розрахунок прибутку
-    // console.log(finalOrder, workingСapital);
-
-    const totalProfit = finalOrder.amount - workingСapital;
-    log(`Прибуток: ${totalProfit.toFixed(2)} USDT`);
+    const totalProfit = (finalOrder.amount * (1 - 0.001))  - firstAmount * prices[pair.first.symbol];
+    // log(`Прибуток після комісії: ${totalProfit.toFixed(2)} USDT`);
 
     if (totalProfit < 0) {
       logError("Операція завершена зі збитком!");

@@ -195,6 +195,6 @@ export const calculateArbitrageProfit = (prices) => {
  // console.log(pairs);
   
 
-  const profitablePairs = pairs.filter(pair => pair.profitInPercentage > 0.1);
+  const profitablePairs = pairs.filter(pair => pair.profitInPercentage > 0.3);
   return profitablePairs;
 }

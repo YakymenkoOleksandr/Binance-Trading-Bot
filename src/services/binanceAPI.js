@@ -44,7 +44,6 @@ export const createOrder = async (symbol, side, quantity) => {
 
     // Округлюємо кількість
     const roundedQuantity = roundToStepSize(quantity, stepSize);
-    console.log(roundedQuantity)
 
     const params = {
       symbol,
