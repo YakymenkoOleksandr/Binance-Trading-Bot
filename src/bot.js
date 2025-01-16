@@ -8,7 +8,8 @@ import {
   waitForBalanceUpdate,
 } from "./utils/showBalances.js";
 import { getBNBBalance } from "./utils/getBNBBalance.js";
-import {calculateAmountFirst, calculateAmountSecond} from "./utils/calculateAmount.js"
+import { calculateAmountFirst, calculateAmountSecond } from "./utils/calculateAmount.js"
+import { syncServerTime } from "./services/binanceAPI.js";
 
 const LOG_INTERVAL = 5000; // Інтервал в мілісекундах (наприклад, 5 секунд)
 const prices = {}; // Кеш для цін
@@ -149,5 +150,9 @@ export const bot = {
   start: () => {
     console.log("Запуск бота...");
     log("Бот запущено.");
+     // Негайна синхронізація часу при запуску
+    syncServerTime();
+    // Регулярна синхронізація часу кожні 5 хвилин
+    setInterval(syncServerTime, 5 * 60 * 1000);
   },
 };

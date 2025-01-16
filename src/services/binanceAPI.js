@@ -7,8 +7,9 @@ import { getStepSize, roundToStepSize } from '../utils/quantity.js'
 
 const apiKey = env('BINANCE_API_KEY');
 const apiSecret = env('BINANCE_API_SECRET');
-
 const baseUrl = 'https://testnet.binance.vision';
+
+let timeOffset = 0; // Глобальна змінна для збереження різниці часу
 
 const sign = (params, secret) => {
   const queryString = new URLSearchParams(params).toString();
@@ -17,7 +18,7 @@ const sign = (params, secret) => {
 
 export const getBalances = async () => {
   const endpoint = '/api/v3/account';
-  const params = { timestamp: Date.now() };
+  const params = { timestamp: Date.now() + timeOffset};
   const signature = sign(params, apiSecret);
 
   const response = await axios.get(`${baseUrl}${endpoint}`, {
@@ -47,7 +48,7 @@ export const createOrder = async (symbol, side, quantity) => {
       side,
       type: 'MARKET',
       quantity: roundedQuantity,
-      timestamp: Date.now(),
+      timestamp: Date.now() + timeOffset,
     };
 
     const signature = sign(params, apiSecret);
@@ -70,5 +71,18 @@ export const createOrder = async (symbol, side, quantity) => {
       logError(`Помилка налаштування запиту: ${error.message}`);
     }
     throw error; // Пробрасываем ошибку дальше
+  }
+};
+
+export const syncServerTime = async () => {
+  try {
+    const response = await axios.get(`${baseUrl}/api/v3/time`);
+    const serverTime = response.data.serverTime; // Час сервера Binance
+    const localTime = Date.now(); // Локальний час
+    timeOffset = serverTime - localTime; // Обчислюємо різницю
+    log(`Синхронізація часу завершена. Різниця: ${timeOffset} мс`);
+  } catch (error) {
+    logError(`Помилка синхронізації часу: ${error.message}`);
+    throw error; // Якщо синхронізація не вдалася, пробрасываем ошибку
   }
 };
