@@ -17,6 +17,7 @@ let lastLogTime = 0; // Час останнього логування про о
 let isExecutingArbitrage = false; // Прапорець виконання
 
 const executeArbitrage = async (pair, prices, workingСapital) => {
+  
   if (isExecutingArbitrage) {
     const currentTime = Date.now();
     if (currentTime - lastLogTime > LOG_INTERVAL) {
