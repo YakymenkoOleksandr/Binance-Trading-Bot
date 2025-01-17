@@ -29,7 +29,7 @@ export const checkUSDTBalance = async (capital) => {
       );
     }
 
-  //  log(`Баланс USDT достатній: ${usdtBalance.free} доступно.`);
+    log(`Баланс USDT достатній: ${usdtBalance.free} доступно.`);
     return true;
   } catch (error) {
     logError(`Помилка при перевірці балансу USDT: ${error.message}`);
@@ -41,35 +41,37 @@ export const waitForBalanceUpdate = async (
   symbol,
   expectedAmount,
   retries = 5,
-  delay = 5000
+  delay = 1500
 ) => {
   let attempt = 0;
-  let initialBalance = 0;
 
-  // Спочатку отримуємо поточний баланс перед покупкою
-  const balancesBefore = await getBalances();
-  const initialBalanceObj = balancesBefore.find((b) => b.asset === symbol);
-  if (initialBalanceObj) {
-    initialBalance = parseFloat(initialBalanceObj.free);
-  }
-
-  while (attempt < retries) {
+  // Перевіряємо баланс для конкретного символу
+  const checkBalance = async () => {
     const balances = await getBalances();
     const balance = balances.find((b) => b.asset === symbol);
+    
+    return balance ? parseFloat(balance.free) : 0;
+  };
 
-    if (balance && parseFloat(balance.free) >= (initialBalance + expectedAmount)) {
-      return true; // Баланс оновлено
+  while (attempt < retries) {
+    const currentBalance = await checkBalance();
+    
+    // Якщо баланс достатній для виконання наступної операції, повертаємо true
+    if (currentBalance >= expectedAmount) {
+      log(`Баланс для ${symbol} достатній: ${currentBalance}. Операція може бути виконана.`);
+      return true;
     }
 
     log(
       `Баланс для ${symbol} ще не оновлений, спроба ${
         attempt + 1
-      } з ${retries}.`
+      } з ${retries}. Поточний баланс: ${currentBalance}, очікувана сума: ${expectedAmount}.`
     );
+
     attempt++;
     await new Promise((resolve) => setTimeout(resolve, delay)); // Затримка між спробами
   }
 
-  logError(`Баланс для ${symbol} не оновлений після ${retries} спроб.`);
-  return false; // Після кількох спроб баланс так і не оновився
+  logError(`Баланс для ${symbol} не оновлений після ${retries} спроб. Поточний баланс: ${await checkBalance()}.`);
+  return false; // Після кількох спроб баланс не досяг потрібної суми
 };

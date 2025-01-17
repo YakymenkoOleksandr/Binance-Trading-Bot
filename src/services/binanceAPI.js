@@ -7,7 +7,7 @@ import { getStepSize, roundToStepSize } from '../utils/quantity.js'
 
 const apiKey = env('BINANCE_API_KEY');
 const apiSecret = env('BINANCE_API_SECRET');
-const baseUrl = 'https://testnet.binance.vision';
+const baseUrl = 'https://testnet.binance.vision'; // 'https://testnet.binance.vision' https://api.binance.com
 
 let timeOffset = 0; // Глобальна змінна для збереження різниці часу
 
@@ -53,7 +53,7 @@ export const createOrder = async (symbol, side, quantity) => {
 
     const signature = sign(params, apiSecret);
     
-    const response = await axios.post(`${baseUrl}/api/v3/order/test`, null, {
+    const response = await axios.post(`${baseUrl}/api/v3/order/test`, null, { // /test
       headers: { 'X-MBX-APIKEY': apiKey },
       params: { ...params, signature },
     });
