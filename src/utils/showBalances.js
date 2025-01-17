@@ -25,11 +25,11 @@ export const checkUSDTBalance = async (capital) => {
 
     if (!usdtBalance || parseFloat(usdtBalance.free) < capital) {
       throw new Error(
-        `Недостатньо коштів USDT для виконання операції: ${capital} USDT потрібні.`
+        `Недостатньо коштів  USDT для виконання операції: ${capital} USDT потрібні.`
       );
     }
 
-    log(`Баланс USDT достатній: ${usdtBalance.free} доступно.`);
+    log(`Баланс для USDT достатній: ${usdtBalance.free}. Операція може бути виконана.`);
     return true;
   } catch (error) {
     logError(`Помилка при перевірці балансу USDT: ${error.message}`);

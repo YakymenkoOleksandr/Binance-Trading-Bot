@@ -37,17 +37,11 @@ export const createOrder = async (symbol, side, quantity) => {
   }
 
   try {
-    // Отримуємо stepSize
-    const stepSize = await getStepSize(symbol);
-
-    // Округлюємо кількість
-    const roundedQuantity = roundToStepSize(quantity, stepSize);
-
     const params = {
       symbol,
       side,
       type: 'MARKET',
-      quantity: roundedQuantity,
+      quantity,
       timestamp: Date.now() + timeOffset,
     };
 
