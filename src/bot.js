@@ -10,6 +10,7 @@ import {
 import { getBNBBalance } from "./utils/getBNBBalance.js";
 import { calculateAmountFirst, calculateAmountSecond } from "./utils/calculateAmount.js"
 import { syncServerTime } from "./services/binanceAPI.js";
+import {getStepSize} from "./utils/quantity.js"
 
 const LOG_INTERVAL = 5000; // Інтервал в мілісекундах (наприклад, 5 секунд)
 const prices = {}; // Кеш для цін
@@ -31,8 +32,21 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
   try {
     log(`Старт арбітражу для пари ${pair.pairName}`);
 
+    const sellPair = `${pair.second.symbol.replace(
+      pair.first.symbol.split("USDT")[0],
+      ""
+    )}USDT`;
+
     // Отримуємо значення балансу BNB
     getBNBBalance();
+    const [firstPairQuantity, secondPairQuantity, thirdPairQuantity] = await Promise.all([
+    getStepSize(pair.first.symbol),
+    getStepSize(pair.second.symbol),
+    getStepSize(pair.first.symbol)
+    ]);
+    
+    console.log(firstPairQuantity, secondPairQuantity, thirdPairQuantity);
+    
 
     // Перевіряємо баланс на USDT
     // log("Перевірка балансу USDT...");
@@ -101,10 +115,6 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     if (!isSecondBalanceUpdated) return; // Перериваємо арбітраж, якщо баланс не оновився*/
 
     // Продаж другої валюти за USDT
-    const sellPair = `${pair.second.symbol.replace(
-      pair.first.symbol.split("USDT")[0],
-      ""
-    )}USDT`;
 
     // Вирахування комісії з після виконання другого ордеру
     let thirdAmount = secondAmount;
