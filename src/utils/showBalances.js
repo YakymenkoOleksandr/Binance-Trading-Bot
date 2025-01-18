@@ -41,7 +41,7 @@ export const waitForBalanceUpdate = async (
   symbol,
   expectedAmount,
   retries = 5,
-  delay = 1500
+  delay = 2000
 ) => {
   let attempt = 0;
 

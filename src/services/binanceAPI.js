@@ -80,3 +80,16 @@ export const syncServerTime = async () => {
     throw error; // Якщо синхронізація не вдалася, пробрасываем ошибку
   }
 };
+
+export const getPrice = async (symbol) => {
+  try {
+    const response = await axios.get(`${baseUrl}/api/v3/ticker/price`, {
+      params: { symbol }, // Торгова пара, наприклад "BTCUSDT"
+    });
+    console.log(`Ціна ${symbol}:`, response.data.price);
+    return response.data.price;
+  } catch (error) {
+    console.error('Помилка отримання ціни:', error.response ? error.response.data : error.message);
+    throw error;
+  }
+};

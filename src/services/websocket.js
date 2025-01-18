@@ -158,7 +158,7 @@ export const connectWebSocket = (onMessage) => {
     .map((symbol) => `${symbol.toLowerCase()}@ticker`)
     .join('/');
 
-  const ws = new WebSocket(`wss://testnet.binance.vision/ws/${streams}`);
+  const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${streams}`);
 
   ws.on('open', () => {
     console.log('WebSocket підключено');

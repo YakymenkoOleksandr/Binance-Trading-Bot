@@ -9,7 +9,7 @@ import {
 } from "./utils/showBalances.js";
 import { getBNBBalance } from "./utils/getBNBBalance.js";
 import { calculateAmountFirst, calculateAmountSecond } from "./utils/calculateAmount.js"
-import { syncServerTime } from "./services/binanceAPI.js";
+import { syncServerTime, getPrice } from "./services/binanceAPI.js";
 import { getStepSize, roundToStepSize } from "./utils/quantity.js";
 
 
@@ -44,7 +44,15 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     getStepSize(pair.first.symbol),
     getStepSize(pair.second.symbol),
     getStepSize(sellPair)
+     ]);
+    
+    const [firstPairPriсe, secondPairPriсe, thirdPairPriсe] = await Promise.all([
+      getPrice(pair.first.symbol),
+      getPrice(pair.second.symbol),
+      getPrice(sellPair)
     ]);
+    
+    
 
    // console.log(firstPairQuantity, secondPairQuantity, thirdPairQuantity);
 
@@ -58,8 +66,12 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     const firstAmountSum = calculateAmountFirst(workingСapital, prices[pair.first.symbol], pair.first.symbol, pair.second.symbol)
     const firstAmount = roundToStepSize(firstAmountSum, firstPairQuantity);
 
-    console.log("Sum 1", firstAmountSum , "Округлення", firstAmount);
+    console.log("Sum 1", firstAmountSum, "Округлення", firstAmount);
+
+    console.log("Скільки монет можна купить за наявну суму ", roundToStepSize(firstAmount / secondPairPriсe, secondPairQuantity));
     
+
+
     if (isUSDTBalanceEnough) {
       // Купівля першої валюти за USDT
     const firstOrder = await createOrder(pair.first.symbol, "BUY", firstAmount);
