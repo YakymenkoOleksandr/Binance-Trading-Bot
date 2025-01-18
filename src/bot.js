@@ -133,7 +133,12 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
       // Для прямої пари, якщо баланс ще не оновлено, то операція буде очікувати оновлення
       if (isSecondBalanceEnough) {
          await createOrder(sellPair, "SELL", thirdAmount);
-      }
+    }
+    
+    const profit = (thirdAmount * thirdPairPriсe) - (firstAmount * firstPairPriсe)
+    console.log(profit);
+    
+
   } catch (error) {
     logError(`Помилка під час арбітражу на операції: ${error.message}`);
   } finally {
