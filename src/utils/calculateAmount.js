@@ -1,21 +1,4 @@
 
-
-export const calculateAmountFirst = (capital, price, firstSymbol, secondSymbol, firstPairQuantity, secondPairQuantity) => {
-  if (!capital || !price || price <= 0) {
-    throw new Error(
-      `Неможливо обчислити кількість монет: capital=${capital}, price=${price}`
-    );
-  }
-
-  if (firstPairQuantity >= secondPairQuantity) {
-    
-  }
-
-  const amount = capital / price; // Обчислення кількості монет без врахування комісії
-
-  return amount;
-};
-
 export const calculateAmountSecond = (firstAmount, price, firstSymbol, secondSymbol, firstPairQuantity, secondPairQuantity) => {
   if (!firstAmount || !price || price <= 0) {
     throw new Error(
