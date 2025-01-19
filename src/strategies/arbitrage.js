@@ -5,13 +5,14 @@ import { calculateProfit } from '../utils/calculateProfit.js'; // Імпорту
 // Логіка для обчислення прибутку по арбітражним парам
 export const calculateArbitrageProfit = (prices) => {
   const workingСapital = 25; // Приклад початкової суми
-  const slippageTolerance = 0.005;
+  
   
   // Торгові пари для арбітражу
   const pairs = [
     // Прямі пари
-    /*{ pairName: "BTC→ETH→USDT", first: { symbol: "BTCUSDT", amount: workingСapital / prices['BTCUSDT'] }, second: { symbol: "ETHBTC", amount: (workingСapital / prices['BTCUSDT']) / prices['ETHBTC'] }, base: { symbol: "USDT" },  profitInPercentage: calculateProfit({ workingСapital, pricesFirstCoin: prices['BTCUSDT'], pricesSecondCoin: prices['ETHUSDT'], pricesCoinToCoin: prices['ETHBTC'] }) },
-    { pairName: "BTC→BNB→USDT", first: { symbol: "BTCUSDT", amount: workingСapital / prices['BTCUSDT'] }, second: { symbol: "BNBBTC", amount: (workingСapital / prices['BTCUSDT']) / prices['BNBBTC'] }, base: { symbol: "USDT" }, profitInPercentage: calculateProfit({ workingСapital, pricesFirstCoin: prices['BTCUSDT'], pricesSecondCoin: prices['BNBUSDT'], pricesCoinToCoin: prices['BNBBTC'] }) },
+    { pairName:"BTC→ETH→USDT", first:{symbol:"BTCUSDT"}, second:{symbol: "ETHBTC"}, third:{symbol:"ETHUSDT"},  profitInPercentage: calculateProfit({ pricesFirstCoin: prices['BTCUSDT'], pricesSecondCoin: prices['ETHUSDT'], pricesCoinToCoin: prices['ETHBTC'], firstSymbol: "BTCUSDT", secondSymbol: "ETHBTC", firstQuantity: 0.00001, secondQuantity: 0.0001, thirdQuantity: 0.0001}) }
+    
+    /*{ pairName: "BTC→BNB→USDT", first: { symbol: "BTCUSDT", amount: workingСapital / prices['BTCUSDT'] }, second: { symbol: "BNBBTC", amount: (workingСapital / prices['BTCUSDT']) / prices['BNBBTC'] }, base: { symbol: "USDT" }, profitInPercentage: calculateProfit({ workingСapital, pricesFirstCoin: prices['BTCUSDT'], pricesSecondCoin: prices['BNBUSDT'], pricesCoinToCoin: prices['BNBBTC'] }) },
     { pairName: "BTC→XRP→USDT", first: { symbol: "BTCUSDT", amount: workingСapital / prices['BTCUSDT'] }, second: { symbol: "XRPBTC", amount: (workingСapital / prices['BTCUSDT']) / prices['XRPBTC'] }, base: { symbol: "USDT" }, profitInPercentage: calculateProfit({ workingСapital, pricesFirstCoin: prices['BTCUSDT'], pricesSecondCoin: prices['XRPUSDT'], pricesCoinToCoin: prices['XRPBTC'] }) },
     { pairName: "BTC→DOT→USDT", first: { symbol: "BTCUSDT", amount: workingСapital / prices['BTCUSDT'] }, second: { symbol: "DOTBTC", amount: (workingСapital / prices['BTCUSDT']) / prices['DOTBTC'] }, base: { symbol: "USDT" }, profitInPercentage: calculateProfit({ workingСapital, pricesFirstCoin: prices['BTCUSDT'], pricesSecondCoin: prices['DOTUSDT'], pricesCoinToCoin: prices['DOTBTC'] }) },
     { pairName: "BTC→SOL→USDT", first: { symbol: "BTCUSDT", amount: workingСapital / prices['BTCUSDT'] }, second: { symbol: "SOLBTC", amount: (workingСapital / prices['BTCUSDT']) / prices['SOLBTC'] }, base: { symbol: "USDT" }, profitInPercentage: calculateProfit({ workingСapital, pricesFirstCoin: prices['BTCUSDT'], pricesSecondCoin: prices['SOLUSDT'], pricesCoinToCoin: prices['SOLBTC'] }) },
@@ -55,7 +56,8 @@ export const calculateArbitrageProfit = (prices) => {
     { pairName: "BTC→WIF→USDT", first: { symbol: "BTCUSDT", amount: workingСapital / prices['BTCUSDT'] }, second: { symbol: "WIFBTC", amount: (workingСapital / prices['BTCUSDT']) / prices['WIFBTC'] }, base: { symbol: "USDT" }, profitInPercentage: calculateProfit({ workingСapital, pricesFirstCoin: prices["BTCUSDT"], pricesSecondCoin: prices["WIFUSDT"], pricesCoinToCoin: prices['WIFBTC'] }) },
     { pairName: "BTC→SEI→USDT", first: { symbol: "BTCUSDT", amount: workingСapital / prices['BTCUSDT'] }, second: { symbol: "SEIBTC", amount: (workingСapital / prices['BTCUSDT']) / prices['SEIBTC'] }, base: { symbol: "USDT" }, profitInPercentage: calculateProfit({ workingСapital, pricesFirstCoin: prices["BTCUSDT"], pricesSecondCoin: prices["SEIUSDT"], pricesCoinToCoin: prices['SEIBTC'] }) },
     { pairName: "BTC→LDO→USDT", first: { symbol: "BTCUSDT", amount: workingСapital / prices['BTCUSDT'] }, second: { symbol: "LDOBTC", amount: (workingСapital / prices['BTCUSDT']) / prices['LDOBTC'] }, base: { symbol: "USDT" }, profitInPercentage: calculateProfit({ workingСapital, pricesFirstCoin: prices["BTCUSDT"], pricesSecondCoin: prices["LDOUSDT"], pricesCoinToCoin: prices['LDOBTC'] }) },
-    */{ pairName: "BTC→SAND→USDT", first: { symbol: "BTCUSDT", amount: workingСapital / prices['BTCUSDT'] }, second: { symbol: "SANDBTC", amount: (workingСapital / prices['BTCUSDT']) / prices['SANDBTC'] }, base: { symbol: "USDT" }, profitInPercentage: calculateProfit({ workingСapital, pricesFirstCoin: prices["BTCUSDT"], pricesSecondCoin: prices["SANDUSDT"], pricesCoinToCoin: prices['SANDBTC'] }) },
+    { pairName: "BTC→SAND→USDT", first: { symbol: "BTCUSDT" }, second: { symbol: "SANDBTC" }, profitInPercentage: calculateProfit({workingСapital, pricesFirstCoin: prices["BTCUSDT"], pricesSecondCoin: prices["SANDUSDT"], pricesCoinToCoin: prices['SANDBTC'] }) },
+
     { pairName: "ETH→BNB→USDT", first: { symbol: "ETHUSDT", amount: workingСapital / prices['ETHUSDT'] }, second: { symbol: "BNBETH", amount: (workingСapital / prices['ETHUSDT']) / prices['BNBETH'] }, base: { symbol: "USDT" }, profitInPercentage: calculateProfit({ workingСapital, pricesFirstCoin: prices['ETHUSDT'], pricesSecondCoin: prices['BNBUSDT'], pricesCoinToCoin: prices['BNBETH'] }) },
     { pairName: "ETH→XRP→USDT", first: { symbol: "ETHUSDT", amount: workingСapital / prices['ETHUSDT'] }, second: { symbol: "XRPETH", amount: (workingСapital / prices['ETHUSDT']) / prices['XRPETH'] }, base: { symbol: "USDT" }, profitInPercentage: calculateProfit({ workingСapital, pricesFirstCoin: prices['ETHUSDT'], pricesSecondCoin: prices['XRPUSDT'], pricesCoinToCoin: prices['XRPETH'] }) },
     { pairName: "ETH→DOT→USDT", first: { symbol: "ETHUSDT", amount: workingСapital / prices['ETHUSDT'] }, second: { symbol: "DOTETH", amount: (workingСapital / prices['ETHUSDT']) / prices['DOTETH'] }, base: { symbol: "USDT" }, profitInPercentage: calculateProfit({ workingСapital, pricesFirstCoin: prices['ETHUSDT'], pricesSecondCoin: prices['DOTUSDT'], pricesCoinToCoin: prices['DOTETH'] }) },
@@ -201,7 +203,7 @@ export const calculateArbitrageProfit = (prices) => {
   */];
 
  // console.log(pairs);
-  const profitablePairs = pairs.filter(pair => pair.profitInPercentage > 0.2).sort((a, b) => b.profitInPercentage - a.profitInPercentage);
+  const profitablePairs = pairs.filter(pair => pair.profitInPercentage > -6).sort((a, b) => b.profitInPercentage - a.profitInPercentage);
 
   return profitablePairs;
 }

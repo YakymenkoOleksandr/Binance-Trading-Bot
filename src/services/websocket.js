@@ -155,7 +155,7 @@ const symbols = [
 // Функція для підключення до Binance WebSocket
 export const connectWebSocket = (onMessage) => {
   const streams = symbols
-    .map((symbol) => `${symbol.toLowerCase()}@ticker`)
+    .map((symbol) => `${symbol.toLowerCase()}@bookTicker`)
     .join('/');
 
   const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${streams}`); // wss://testnet.binance.vision/ws wss://stream.binance.com:9443/ws
@@ -167,8 +167,11 @@ export const connectWebSocket = (onMessage) => {
   ws.on('message', (message) => {
     try {
       const data = JSON.parse(message);
-      if (data.s && data.c) {
-        prices[data.s] = parseFloat(data.c);
+      if (data.s && data.b && data.a) {
+      prices[data.s] = {
+          bid: parseFloat(data.b), // Bid ціна
+          ask: parseFloat(data.a)  // Ask ціна
+        };
         onMessage(prices); // Передаємо оновлені ціни в обробник
       } else {
         console.error('Невірні дані від WebSocket:', data);

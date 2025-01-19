@@ -59,7 +59,7 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     
     console.log(firstPairBidAskPriсe, secondPairBidAskPriсe, thirdBidAskPairPriсe,);
     
-    // console.log(firstPairQuantity, secondPairQuantity, thirdPairQuantity);
+     console.log(firstPairQuantity, secondPairQuantity, thirdPairQuantity);
    
     
     // console.log(firstPairBidAskPriсe.ask, secondPairPriсe, thirdPairPriсe);
