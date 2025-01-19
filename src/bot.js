@@ -1,15 +1,14 @@
 import { connectWebSocket } from "./services/websocket.js";
 import { calculateArbitrageProfit } from "./strategies/arbitrage.js";
-import { createOrder, getBalances } from "./services/binanceAPI.js";
+import { createOrder, getBidAskPrices, getBidAskVolumes } from "./services/binanceAPI.js";
 import { log, logError } from "./services/logger.js";
 import {
-  checkBalance,
   checkUSDTBalance,
   waitForBalanceUpdate,
 } from "./utils/showBalances.js";
 import { getBNBBalance } from "./utils/getBNBBalance.js";
 import {  calculateAmountSecond } from "./utils/calculateAmount.js"
-import { syncServerTime, getPrice } from "./services/binanceAPI.js";
+import { syncServerTime, getPrice,  } from "./services/binanceAPI.js";
 import { getStepSize, roundToStepSize } from "./utils/quantity.js";
 
 
@@ -41,21 +40,29 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     const secondCoin = `${pair.second.symbol.replace(pair.first.symbol.split("USDT")[0], "")}`
     
     // До якого значення округляється торгова пара
-     const [firstPairQuantity, secondPairQuantity, thirdPairQuantity] = await Promise.all([
-    getStepSize(pair.first.symbol),
-    getStepSize(pair.second.symbol),
-    getStepSize(sellPair)
-     ]);
-    
-    // console.log(firstPairQuantity, secondPairQuantity, thirdPairQuantity);
-    
-    const [firstPairPriсe, secondPairPriсe, thirdPairPriсe] = await Promise.all([
+    const [firstPairQuantity, secondPairQuantity, thirdPairQuantity, firstPairPriсe,
+      secondPairPriсe, thirdPairPriсe, firstPairBidAskPriсe, secondPairBidAskPriсe, thirdBidAskPairPriсe, ] = await Promise.all([ 
+      getStepSize(pair.first.symbol),
+      getStepSize(pair.second.symbol),
+      getStepSize(sellPair),
       getPrice(pair.first.symbol),
       getPrice(pair.second.symbol),
-      getPrice(sellPair)
-    ]);
+      getPrice(sellPair),
+      getBidAskPrices(pair.first.symbol),
+      getBidAskPrices(pair.second.symbol),
+      getBidAskPrices(sellPair),
+     /* getBidAskVolumes(pair.first.symbol),
+      getBidAskVolumes(pair.second.symbol),
+      getBidAskVolumes(sellPair),*/
+      //firstPairBidAskVolumes, secondPairBidAskVolumes, thirdPairBidAskVolumes
+     ]);
     
-    // console.log(firstPairPriсe, secondPairPriсe, thirdPairPriсe);
+    console.log(firstPairBidAskPriсe, secondPairBidAskPriсe, thirdBidAskPairPriсe,);
+    
+    // console.log(firstPairQuantity, secondPairQuantity, thirdPairQuantity);
+   
+    
+    // console.log(firstPairBidAskPriсe.ask, secondPairPriсe, thirdPairPriсe);
     
     // Отримуємо значення балансу BNB
      getBNBBalance();
@@ -65,14 +72,14 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     
     // Підрахунок кількості валюти, яку можна купить за workcapital
     // Скільки реально USDT піде на купівлю 
-    const preFirstAmount = roundToStepSize(workingСapital / firstPairPriсe, firstPairQuantity) * firstPairPriсe;
+    const preFirstAmount = roundToStepSize(workingСapital / firstPairBidAskPriсe.ask, firstPairQuantity) * firstPairBidAskPriсe.ask;
     // Округлення суми до допустимих значень кількість USDT
     const firstAmountUSDT = roundToStepSize(preFirstAmount, firstPairQuantity);
     // Визначення неокругленої суми першої монети
-    const firstAmountNotRounded = firstAmountUSDT / firstPairPriсe;
+    const firstAmountNotRounded = firstAmountUSDT / firstPairBidAskPriсe.ask;
     // Округлення суми до допустимих значень кількості першої монети
     const firstAmount = roundToStepSize(firstAmountNotRounded, firstPairQuantity);
-    console.log("Округлена сума USDT", firstAmountUSDT, "Ціна пари", firstPairPriсe, "Округлена кількість покупки ", firstAmount, "Округлення ", firstPairQuantity);
+    console.log("Округлена сума USDT", firstAmountUSDT, "Ціна пари", firstPairBidAskPriсe.ask, "Округлена кількість покупки ", firstAmount, "Округлення ", firstPairQuantity);
     
 
     if (isUSDTBalanceEnough) {
@@ -81,7 +88,7 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     }
     
     // Обчислення кількості монет для другої валюти
-    const secondAmountSum = calculateAmountSecond(firstAmount, prices[pair.second.symbol], pair.first.symbol, pair.second.symbol );
+    const secondAmountSum = calculateAmountSecond(firstAmount, secondPairBidAskPriсe.bid, secondPairBidAskPriсe.ask, pair.first.symbol, pair.second.symbol );
     const secondAmount = roundToStepSize(secondAmountSum, secondPairQuantity);
     console.log("Sum 2 до перетворення", firstAmount, "Округлення після перетворення", secondAmount);
 
@@ -140,14 +147,14 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
 
     // console.log(firstAmount, secondAmount, thirdAmount);
     
-    // console.log(firstPairPriсe, secondPairPriсe, thirdPairPriсe);
+    // console.log(firstPairBidAskPriсe.ask, secondPairPriсe, thirdPairPriсe);
 
-    const firstSumComision = (firstAmount * firstPairPriсe) * 0.00075;
-    const secondSumComision = (secondAmount * secondPairPriсe * firstPairPriсe) * 0.00075
-    const thirdSumComision = (thirdAmount * thirdPairPriсe) * 0.00075
+    const firstSumComision = (firstAmount * firstPairBidAskPriсe.ask) * 0.00075;
+    const secondSumComision = (secondAmount * secondPairPriсe * firstPairBidAskPriсe.ask) * 0.00075
+    const thirdSumComision = (thirdAmount * thirdBidAskPairPriсe.bid) * 0.00075
     const totalSumOfComision = firstSumComision + secondSumComision + thirdSumComision;
-    const profit = (thirdAmount * thirdPairPriсe) - (firstAmount / firstPairPriсe) - totalSumOfComision
-    console.log("Початкова сума: ",(firstAmount * firstPairPriсe) ,"Сума після виконання всіх операцій: ", profit);
+    const profit = (thirdAmount * thirdBidAskPairPriсe.bid) - (firstAmount / firstPairBidAskPriсe.ask) - totalSumOfComision
+    console.log("Дохід: ", profit - (firstAmount * firstPairBidAskPriсe.ask), "Дохід у відсотках: ", (profit /(firstAmount * firstPairBidAskPriсe.ask)) * 100 - 100, "%" );
     
 
   } catch (error) {

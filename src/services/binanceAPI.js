@@ -93,3 +93,51 @@ export const getPrice = async (symbol) => {
     throw error;
   }
 };
+
+export async function getBidAskPrices(pair) {
+  const url = `${baseUrl}/api/v3/ticker/bookTicker`;
+
+  try {
+    // Відправляємо запит до API Binance
+    const response = await axios.get(url, {
+      params: {
+        symbol: pair,
+      },
+    });
+
+    // Парсимо результат
+    const { bidPrice, askPrice } = response.data;
+
+    // Повертаємо об'єкт із bid і ask цінами
+    return {
+      bid: parseFloat(bidPrice),
+      ask: parseFloat(askPrice),
+    };
+  } catch (error) {
+    console.error(`Помилка отримання даних для пари ${pair}:`, error.message);
+    throw error; // Пробросимо помилку для обробки вище
+  }
+}
+
+export async function getBidAskVolumes(pair) {
+  const url = `${baseUrl}/api/v3/depth`;
+
+  try {
+    const response = await axios.get(url, {
+      params: { symbol: pair, limit: 5 }, // Ліміт 5 для отримання топових заявок
+    });
+
+    const { bids, asks } = response.data;
+
+    // Об'єм на найкращій ціні bid (перший елемент масиву bids)
+    const bidVolume = parseFloat(bids[0][1]); // [0] - ціна, [1] - об'єм
+
+    // Об'єм на найкращій ціні ask (перший елемент масиву asks)
+    const askVolume = parseFloat(asks[0][1]); // [0] - ціна, [1] - об'єм
+
+    return { bidVolume, askVolume };
+  } catch (error) {
+    console.error(`Помилка отримання об'ємів по bid/ask для пари ${pair}:`, error.message);
+    throw error; // Прокидаємо помилку для обробки вище
+  }
+}
