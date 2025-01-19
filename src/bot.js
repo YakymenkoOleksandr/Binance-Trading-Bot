@@ -40,18 +40,18 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     const secondCoin = `${pair.second.symbol.replace(pair.first.symbol.split("USDT")[0], "")}`
     
     // До якого значення округляється торгова пара
-    const [firstPairQuantity, secondPairQuantity, thirdPairQuantity, firstPairPriсe,
-      secondPairPriсe, thirdPairPriсe, firstPairBidAskPriсe, secondPairBidAskPriсe, thirdBidAskPairPriсe, ] = await Promise.all([ 
+    const [firstPairQuantity, secondPairQuantity, thirdPairQuantity, firstPairBidAskPriсe, secondPairBidAskPriсe, thirdBidAskPairPriсe, ] = await Promise.all([ 
       getStepSize(pair.first.symbol),
       getStepSize(pair.second.symbol),
       getStepSize(sellPair),
-      getPrice(pair.first.symbol),
-      getPrice(pair.second.symbol),
-      getPrice(sellPair),
       getBidAskPrices(pair.first.symbol),
       getBidAskPrices(pair.second.symbol),
-      getBidAskPrices(sellPair),
-     /* getBidAskVolumes(pair.first.symbol),
+        getBidAskPrices(sellPair),
+      /*getPrice(pair.first.symbol),
+      getPrice(pair.second.symbol),
+      getPrice(sellPair),*/
+      // firstPairPriсe, secondPairPriсe, thirdPairPriсe,
+      /* getBidAskVolumes(pair.first.symbol),
       getBidAskVolumes(pair.second.symbol),
       getBidAskVolumes(sellPair),*/
       //firstPairBidAskVolumes, secondPairBidAskVolumes, thirdPairBidAskVolumes
@@ -150,7 +150,17 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     // console.log(firstPairBidAskPriсe.ask, secondPairPriсe, thirdPairPriсe);
 
     const firstSumComision = (firstAmount * firstPairBidAskPriсe.ask) * 0.00075;
-    const secondSumComision = (secondAmount * secondPairPriсe * firstPairBidAskPriсe.ask) * 0.00075
+    let secondSumComision
+    if (
+    pair.first.symbol !== "BTCUSDT" &&
+    pair.first.symbol !== "ETHUSDT" &&
+    pair.first.symbol !== "BNBUSDT"
+    ) {
+    // Перевернута пара: X → BTC, ETH, BNB (множимо)
+      secondSumComision = (secondAmount * secondPairBidAskPriсe.ask * firstPairBidAskPriсe.ask) * 0.00075
+    } else {
+      secondSumComision = (secondAmount * secondPairBidAskPriсe.bid * firstPairBidAskPriсe.ask) * 0.00075
+    }
     const thirdSumComision = (thirdAmount * thirdBidAskPairPriсe.bid) * 0.00075
     const totalSumOfComision = firstSumComision + secondSumComision + thirdSumComision;
     const profit = (thirdAmount * thirdBidAskPairPriсe.bid) - (firstAmount / firstPairBidAskPriсe.ask) - totalSumOfComision
