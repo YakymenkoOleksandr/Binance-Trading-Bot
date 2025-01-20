@@ -47,7 +47,6 @@ export function calculateProfit({ pricesFirstCoin, pricesCoinToCoin, pricesSecon
   let amountBeforeThirdTrade = Math.floor(amountAfterSecondTrade / thirdQuantity) * thirdQuantity;
   amountBeforeThirdTrade = parseFloat(amountAfterSecondTrade.toFixed(-Math.log10(thirdQuantity)));
 
-  console.log(amountBeforeThirdTrade);
   let firstComision = (amountAfterFirstTrade * pricesFirstCoin.ask) - deductCommission(amountAfterFirstTrade * pricesFirstCoin.bid);
 
   let secondComision = (amountBeforeSecondOperation * pricesFirstCoin.ask) - deductCommission(amountBeforeSecondOperation * pricesFirstCoin.ask);
@@ -55,15 +54,12 @@ export function calculateProfit({ pricesFirstCoin, pricesCoinToCoin, pricesSecon
   let thirdComision = (amountBeforeThirdTrade * pricesSecondCoin.bid) - deductCommission(amountBeforeThirdTrade * pricesSecondCoin.bid)
 
   let sumOfComision = firstComision + secondComision + thirdComision;
-  
-  
+
   let finalAmountUSDT = amountBeforeThirdTrade * pricesSecondCoin.bid - sumOfComision; // Продаж другої валюти за USDT
-  // console.log(finalAmountUSDT);
+
   let amountAfterThirdTrade = Math.floor(finalAmountUSDT / 0.01) * 0.01;
-  // console.log(amountAfterThirdTrade);
-  
+
   // Розрахунок прибутку
-  //const profitInPercentage = ((amountAfterThirdTrade - (amountAfterFirstTrade * pricesFirstCoin.bid)) / (amountAfterFirstTrade * pricesFirstCoin.bid)) * 100;
   const profitInPercentage = ((amountAfterThirdTrade - usedUSDTInFirstOperation)/usedUSDTInFirstOperation) * 100;
 
   
