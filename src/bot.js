@@ -17,7 +17,7 @@ const prices = {}; // Кеш для цін
 let lastLogTime = 0; // Час останнього логування про очікування
 let isExecutingArbitrage = false; // Прапорець виконання
 
-const executeArbitrage = async (pair, prices, workingСapital) => {  
+const executeArbitrage = async (pair, prices, workingСapital, ) => {  
   
   if (isExecutingArbitrage) {
     const currentTime = Date.now();
@@ -43,7 +43,7 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     const [firstPairQuantity, secondPairQuantity, thirdPairQuantity, firstPairBidAskPriсe, secondPairBidAskPriсe, thirdBidAskPairPriсe, ] = await Promise.all([ 
       getStepSize(pair.first.symbol),
       getStepSize(pair.second.symbol),
-      getStepSize(sellPair),
+      getStepSize(pair.third.symbol),
       getBidAskPrices(pair.first.symbol),
       getBidAskPrices(pair.second.symbol),
         getBidAskPrices(sellPair),
@@ -59,7 +59,7 @@ const executeArbitrage = async (pair, prices, workingСapital) => {
     
     console.log(firstPairBidAskPriсe, secondPairBidAskPriсe, thirdBidAskPairPriсe,);
     
-     console.log(firstPairQuantity, secondPairQuantity, thirdPairQuantity);
+    console.log(firstPairQuantity, secondPairQuantity, thirdPairQuantity);
    
     
     // console.log(firstPairBidAskPriсe.ask, secondPairPriсe, thirdPairPriсe);
