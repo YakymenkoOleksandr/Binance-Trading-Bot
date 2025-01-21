@@ -29,7 +29,7 @@ export function calculateProfit({ pricesFirstCoin, pricesCoinToCoin, pricesSecon
   let usedUSDTInFirstOperation = amountBeforeSecondOperation * pricesFirstCoin.ask
 
   let amountAfterSecondTrade
-  
+
   if (
     firstSymbol !== "BTCUSDT" &&
     firstSymbol !== "ETHUSDT" &&
@@ -43,6 +43,8 @@ export function calculateProfit({ pricesFirstCoin, pricesCoinToCoin, pricesSecon
     amountAfterSecondTrade = Math.floor(amountAfterSecondTrade / secondQuantity) * secondQuantity;
     amountAfterSecondTrade = parseFloat(amountAfterSecondTrade.toFixed(-Math.log10(secondQuantity)));
   }
+  
+  
   
   let amountBeforeThirdTrade = Math.floor(amountAfterSecondTrade / thirdQuantity) * thirdQuantity;
   amountBeforeThirdTrade = parseFloat(amountAfterSecondTrade.toFixed(-Math.log10(thirdQuantity)));
@@ -63,11 +65,11 @@ export function calculateProfit({ pricesFirstCoin, pricesCoinToCoin, pricesSecon
   const profitInPercentage = ((amountAfterThirdTrade - usedUSDTInFirstOperation)/usedUSDTInFirstOperation) * 100;
 
   
-  console.log("Кількість USDT на першу операцію",usedUSDTInFirstOperation , "Кількість першої монети після покупки", amountAfterFirstTrade, "Кількість першої монети після округлення ", amountBeforeSecondOperation,
+  /*console.log("Кількість USDT на першу операцію",usedUSDTInFirstOperation , "Кількість першої монети після покупки", amountAfterFirstTrade, "Кількість першої монети після округлення ", amountBeforeSecondOperation,
     "Кількість другої монети ", amountAfterSecondTrade, "Кількість другої монети після округлення ", amountBeforeThirdTrade, 
     "Кількість USDT після всіх операцій ", finalAmountUSDT, "Кількість USDT після округлення ", amountAfterThirdTrade,
     "tickSize1",  firstQuantity, "tickSize2", secondQuantity, "tickSize3", thirdQuantity, "Процент вигоди ", profitInPercentage,
-   );
+   );*/
   
   
   return profitInPercentage;

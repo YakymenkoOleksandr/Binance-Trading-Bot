@@ -183,6 +183,7 @@ const handlePricesUpdate = (updatedPrices) => {
 
   if (profitablePairs.length > 0) {
     const mostProfitablePair = profitablePairs[0]; // Беремо найвигіднішу пару  
+    console.log(mostProfitablePair);
     
     const workingСapital = 100; // Початковий капітал для арбітражу
     executeArbitrage(mostProfitablePair, prices, workingСapital);
