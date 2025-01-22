@@ -210,8 +210,9 @@ export const calculateArbitrageProfit = (prices) => {
     { pairName: "BTC→DAI→USDT", first: {symbol:"BTCUSDT"}, second: {symbol:"BTCDAI"}, third:{symbol:"USDTDAI"}, profitInPercentage: calculateProfit({ pricesFirstCoin: prices['BTCUSDT'], pricesSecondCoin: prices['USDTDAI'], pricesCoinToCoin: prices['BTCDAI'], firstSymbol: "BTCUSDT", secondSymbol: "BTCDAI", firstQuantity: 0.00001, secondQuantity: 0.00001, thirdQuantity: 0.01 }) },
     */];
 
- // console.log(pairs);
-  const profitablePairs = pairs.filter(pair => pair.profitInPercentage > 0).sort((a, b) => b.profitInPercentage - a.profitInPercentage);
+  // console.log(pairs);
+  
+  const profitablePairs = pairs.filter(pair => pair.profitInPercentage > 0.25).sort((a, b) => b.profitInPercentage - a.profitInPercentage);
 
   return profitablePairs;
 }

@@ -34,7 +34,7 @@ export const calculateAmountSecond = (firstAmount, secondPairBidAskPriсeBid, se
     amount = firstAmount / secondPairBidAskPriсeBid; // Ділимо на ціну для прямої пари
   } else {
     // Пряма пара: BTC, ETH, BNB → X (ділимо)
-    amount = firstAmount  / secondPairBidAskPriсeBid; // Ділимо на ціну для прямої пари
+    amount = firstAmount  / secondPairBidAskPriсeAsk; // Ділимо на ціну для прямої пари
   }
 
   return amount;

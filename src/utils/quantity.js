@@ -43,4 +43,4 @@ export const roundToStepSize = (quantity, stepSize) => {
 
   // Округлення вниз до найближчого кратного stepSize
   return Math.floor(quantity * factor) / factor;
-};
+    };

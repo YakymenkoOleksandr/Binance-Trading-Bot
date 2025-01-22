@@ -17,8 +17,8 @@ const prices = {}; // Кеш для цін
 let lastLogTime = 0; // Час останнього логування про очікування
 let isExecutingArbitrage = false; // Прапорець виконання
 
-const executeArbitrage = async (pair, prices, workingСapital, ) => {  
-  
+const executeArbitrage = async (pair) => {  
+  // Прапорець виконання арбітражу
   if (isExecutingArbitrage) {
     const currentTime = Date.now();
     if (currentTime - lastLogTime > LOG_INTERVAL) {
@@ -29,96 +29,93 @@ const executeArbitrage = async (pair, prices, workingСapital, ) => {
   }
 
   isExecutingArbitrage = true; // Встановлюємо прапорець
+
   try {
     log(`Старт арбітражу для пари ${pair.pairName}`);
-    console.log("Profit ", pair.profitInPercentage, " %");
-    const sellPair = `${pair.second.symbol.replace(
-      pair.first.symbol.split("USDT")[0],
-      ""
-    )}USDT`;
-    const firstCoin = pair.first.symbol.replace('USDT', '')
-    const secondCoin = `${pair.second.symbol.replace(pair.first.symbol.split("USDT")[0], "")}`
+    console.log("Profit ", pair.profitInPercentage, " %"); // Профіт для пари, який надійшов з обчислень з webSocet данних
+
+    // Найвигідніша пара, яку ми отримуємо
+    //  console.log(pair);
+    // Капітал для арбітражу
+    let workingСapital = 100;
+    // Назви пар які беруть учать в обміні
+    let firstSeilPair = pair.first.symbol;
+    let secondSeilPair = pair.second.symbol;
+    let thirdSeilPair = pair.third.symbol;
+    
+    // Монети, які обмінюються
+    let firstCoin = firstSeilPair.replace('USDT', '')
+    let secondCoin = secondSeilPair.replace(firstCoin, '')
+    // console.log("Перша монета", firstCoin, "Друга монета", secondCoin);
     
     // До якого значення округляється торгова пара
-    const [firstPairQuantity, secondPairQuantity, thirdPairQuantity, firstPairBidAskPriсe, secondPairBidAskPriсe, thirdBidAskPairPriсe, ] = await Promise.all([ 
-      getStepSize(pair.first.symbol),
-      getStepSize(pair.second.symbol),
-      getStepSize(pair.third.symbol),
-      getBidAskPrices(pair.first.symbol),
-      getBidAskPrices(pair.second.symbol),
-        getBidAskPrices(sellPair),
-      /*getPrice(pair.first.symbol),
-      getPrice(pair.second.symbol),
-      getPrice(sellPair),*/
-      // firstPairPriсe, secondPairPriсe, thirdPairPriсe,
-      /* getBidAskVolumes(pair.first.symbol),
-      getBidAskVolumes(pair.second.symbol),
-      getBidAskVolumes(sellPair),*/
-      //firstPairBidAskVolumes, secondPairBidAskVolumes, thirdPairBidAskVolumes
+    const [firstPairQuantity, secondPairQuantity, thirdPairQuantity, firstPairBidAskPriсe] = await Promise.all([ 
+      getStepSize(firstSeilPair),
+      getStepSize(secondSeilPair),
+      getStepSize(thirdSeilPair),
+      getBidAskPrices(firstSeilPair),
      ]);
-    
-    console.log(firstPairBidAskPriсe, secondPairBidAskPriсe, thirdBidAskPairPriсe,);
-    
-    console.log(firstPairQuantity, secondPairQuantity, thirdPairQuantity);
-   
-    
-    // console.log(firstPairBidAskPriсe.ask, secondPairPriсe, thirdPairPriсe);
+
+    // Значення округлення певної валюти
+    console.log(firstSeilPair, firstPairQuantity, secondSeilPair, secondPairQuantity, thirdSeilPair, thirdPairQuantity);
     
     // Отримуємо значення балансу BNB
      getBNBBalance();
     
-    // Перевіряємо баланс на USDT
+    // Перевіряємо баланс на достатність USDT
     const isUSDTBalanceEnough = await checkUSDTBalance(workingСapital);
-    
     // Підрахунок кількості валюти, яку можна купить за workcapital
-    // Скільки реально USDT піде на купівлю 
-    const preFirstAmount = roundToStepSize(workingСapital / firstPairBidAskPriсe.ask, firstPairQuantity) * firstPairBidAskPriсe.ask;
-    // Округлення суми до допустимих значень кількість USDT
-    const firstAmountUSDT = roundToStepSize(preFirstAmount, firstPairQuantity);
-    // Визначення неокругленої суми першої монети
-    const firstAmountNotRounded = firstAmountUSDT / firstPairBidAskPriсe.ask;
-    // Округлення суми до допустимих значень кількості першої монети
-    const firstAmount = roundToStepSize(firstAmountNotRounded, firstPairQuantity);
-    console.log("Округлена сума USDT", firstAmountUSDT, "Ціна пари", firstPairBidAskPriсe.ask, "Округлена кількість покупки ", firstAmount, "Округлення ", firstPairQuantity);
-    
+    let preFirstAmountBeforeRaunded = workingСapital / firstPairBidAskPriсe.ask;
 
+    // Округлена кількість першої валюти до дозволеної Binance
+    const firstAmount = roundToStepSize(preFirstAmountBeforeRaunded, firstPairQuantity);
+    // Скільки монети можна купити за робочий капітал
+    console.log("Кількість першої монети, яку можна купити за workingCapital", preFirstAmountBeforeRaunded, "Після округлення", firstAmount);
+    
     if (isUSDTBalanceEnough) {
       // Купівля першої валюти за USDT
-    const firstOrder = await createOrder(pair.first.symbol, "BUY", firstAmount);
+    const firstOrder = await createOrder(firstSeilPair, "BUY", firstAmount);
     }
-    
-    // Обчислення кількості монет для другої валюти
-    const secondAmountSum = calculateAmountSecond(firstAmount, secondPairBidAskPriсe.bid, secondPairBidAskPriсe.ask, pair.first.symbol, pair.second.symbol );
+
+    // Отримуємо актуальну ціну другої пари
+    const secondPairBidAskPriсe = await getBidAskPrices(secondSeilPair);
+     
+    // Обчислення кількості монет для другої валюти для покупки
+    const secondAmountSum = calculateAmountSecond(firstAmount, secondPairBidAskPriсe.bid, secondPairBidAskPriсe.ask, firstSeilPair, secondSeilPair);
+
+    // Округлення кількості монет для другої валюти для покупки
     const secondAmount = roundToStepSize(secondAmountSum, secondPairQuantity);
-    console.log("Sum 2 до перетворення", firstAmount, "Округлення після перетворення", secondAmount);
+
+    // Значення які ми отримуємо до та після округлення для другої монети
+    console.log("Sum 2 до перетворення", secondAmountSum, "Округлення після перетворення", secondAmount);
 
     // Продаж першої валюти для купівлі другої
     // Для прямої пари
     
     if (pair.first.symbol !== "BTCUSDT" && pair.first.symbol !== "ETHUSDT" && pair.first.symbol !== "BNBUSDT") {
       // Для перевернутої пари
-      const secondOrderSell = await createOrder(pair.second.symbol, "SELL", firstAmount);
+    /*  const secondOrderSell = await createOrder(secondSeilPair, "SELL", firstAmount);*/
     }
-    else if (pair.first.symbol === "DAIUSDT" && pair.second.symbol === "BTCDAI") {
-    const secondOrderBuy = await createOrder(pair.second.symbol, "BUY", secondAmount); // Виключення пряма пара
+    /*else if (pair.first.symbol === "DAIUSDT" && secondSeilPair === "BTCDAI") {
+    const secondOrderBuy = await createOrder(secondSeilPair, "BUY", secondAmount); // Виключення пряма пара
     }
-    else if (pair.first.symbol === "DAIUSDT" && pair.second.symbol === "ETHDAI") {
-      const secondOrderBuy = await createOrder(pair.second.symbol, "BUY", secondAmount); // Виключення пряма пара   
-    } else if (pair.first.symbol === "ETHUSDT" && pair.second.symbol === "ETHBTC") {
-      const secondOrderSell = await createOrder(pair.second.symbol, "SELL", firstAmount); // Виключення перевернута пара
+    else if (pair.first.symbol === "DAIUSDT" && secondSeilPair === "ETHDAI") {
+      const secondOrderBuy = await createOrder(secondSeilPair, "BUY", secondAmount); // Виключення пряма пара   
+    } else if (pair.first.symbol === "ETHUSDT" && secondSeilPair === "ETHBTC") {
+      const secondOrderSell = await createOrder(secondSeilPair, "SELL", firstAmount); // Виключення перевернута пара
     }
-    else if (pair.first.symbol === "ETHUSDT" && pair.second.symbol === "ETHDAI") {
-    const secondOrderSell = await createOrder(pair.second.symbol, "SELL", firstAmount); // Виключення перевернута пара
+    else if (pair.first.symbol === "ETHUSDT" && secondSeilPair === "ETHDAI") {
+    const secondOrderSell = await createOrder(secondSeilPair, "SELL", firstAmount); // Виключення перевернута пара
     }
-    else if (pair.first.symbol === "BNBUSDT" && pair.second.symbol === "BNBETH") {
-    const secondOrderSell = await createOrder(pair.second.symbol, "SELL", firstAmount); // Виключення перевернута пара
+    else if (pair.first.symbol === "BNBUSDT" && secondSeilPair === "BNBETH") {
+    const secondOrderSell = await createOrder(secondSeilPair, "SELL", firstAmount); // Виключення перевернута пара
     }
-    else if (pair.first.symbol === "BNBUSDT" && pair.second.symbol === "BNBBTC") {
-    const secondOrderSell = await createOrder(pair.second.symbol, "SELL", firstAmount); // Виключення перевернута пара
+    else if (pair.first.symbol === "BNBUSDT" && secondSeilPair === "BNBBTC") {
+    const secondOrderSell = await createOrder(secondSeilPair, "SELL", firstAmount); // Виключення перевернута пара
     }
-    else if (pair.first.symbol === "SHIB" && pair.second.symbol === "DOGE") {
-    const secondOrderSell = await createOrder(pair.second.symbol, "SELL", firstAmount); // Виключення перевернута пара
-    }
+    else if (pair.first.symbol === "SHIB" && secondSeilPair === "DOGE") {
+    const secondOrderSell = await createOrder(secondSeilPair, "SELL", firstAmount); // Виключення перевернута пара
+    }*/
     else {
       const isFirstBalanceEnough = await waitForBalanceUpdate(
       firstCoin,
@@ -126,13 +123,15 @@ const executeArbitrage = async (pair, prices, workingСapital, ) => {
       );
       // Для прямої пари, якщо баланс ще не оновлено, то операція буде очікувати оновлення
       if (isFirstBalanceEnough) {
-        const secondOrderBuy = await createOrder(pair.second.symbol, "BUY", secondAmount);
+        const secondOrderBuy = await createOrder(secondSeilPair, "BUY", secondAmount);
       }
     }
 
     // Третій ордер продаж другої валюти за USDT
     
+    // Округлення не 
     let thirdAmount = roundToStepSize(secondAmount, thirdPairQuantity);
+
     console.log("Sum 3 до перетворення", secondAmount, "Округлення після перетворення", thirdAmount);
     // Очікуємо оновлення балансу другої валюти
 
@@ -142,14 +141,17 @@ const executeArbitrage = async (pair, prices, workingСapital, ) => {
       );
       // Для прямої пари, якщо баланс ще не оновлено, то операція буде очікувати оновлення
       if (isSecondBalanceEnough) {
-         await createOrder(sellPair, "SELL", thirdAmount);
+         await createOrder(thirdSeilPair, "SELL", thirdAmount);
     }
 
-    // console.log(firstAmount, secondAmount, thirdAmount);
-    
-    // console.log(firstPairBidAskPriсe.ask, secondPairPriсe, thirdPairPriсe);
+    // Запит актуальної ціни для третьої пари
+    const thirdBidAskPairPriсe = await getBidAskPrices(thirdSeilPair);
 
+
+    // Перша сума комісії
     const firstSumComision = (firstAmount * firstPairBidAskPriсe.ask) * 0.00075;
+
+    // Друга сума комісії
     let secondSumComision
     if (
     pair.first.symbol !== "BTCUSDT" &&
@@ -157,20 +159,29 @@ const executeArbitrage = async (pair, prices, workingСapital, ) => {
     pair.first.symbol !== "BNBUSDT"
     ) {
     // Перевернута пара: X → BTC, ETH, BNB (множимо)
-      secondSumComision = (secondAmount * secondPairBidAskPriсe.ask * firstPairBidAskPriсe.ask) * 0.00075
+      secondSumComision = (secondAmount * secondPairBidAskPriсe.ask * firstPairBidAskPriсe.ask) * 0.00075;
     } else {
-      secondSumComision = (secondAmount * secondPairBidAskPriсe.bid * firstPairBidAskPriсe.ask) * 0.00075
+      secondSumComision = (secondAmount * secondPairBidAskPriсe.ask * firstPairBidAskPriсe.ask) * 0.00075;
     }
-    const thirdSumComision = (thirdAmount * thirdBidAskPairPriсe.bid) * 0.00075
+
+    // Третя сума комісії
+    const thirdSumComision = (thirdAmount * thirdBidAskPairPriсe.bid) * 0.00075;
+
+    // Сума комісій разом 
     const totalSumOfComision = firstSumComision + secondSumComision + thirdSumComision;
-    const profit = (thirdAmount * thirdBidAskPairPriсe.bid) - (firstAmount / firstPairBidAskPriсe.ask) - totalSumOfComision
-    console.log("Дохід: ", profit - (firstAmount * firstPairBidAskPriсe.ask), "Дохід у відсотках: ", (profit /(firstAmount * firstPairBidAskPriсe.ask)) * 100 - 100, "%" );
+
+    // Сума USDT після осанньої операції
+    let sumUSDTAfterLastTrade = thirdAmount * thirdBidAskPairPriсe.bid;
+
+    // Різниця початково затраченого капіталу та суми після продажу останньої пари з вирахуванням суми комісій
+    let profit = sumUSDTAfterLastTrade - (firstAmount * firstPairBidAskPriсe.ask) - totalSumOfComision;
+    console.log("Дохід: ", roundToStepSize(profit, 0.01), "Дохід у відсотках: ", ((profit) /(firstAmount * firstPairBidAskPriсe.ask)) * 100, "%" );
     
 
   } catch (error) {
     logError(`Помилка під час арбітражу на операції: ${error.message}`);
   } finally {
-   const finalOrder = isExecutingArbitrage = false; // Знімаємо прапорець після завершення
+    isExecutingArbitrage = false; // Знімаємо прапорець після завершення
   }
 };
 
@@ -180,13 +191,9 @@ const handlePricesUpdate = (updatedPrices) => {
 
   // Знаходимо вигідні пари
   const profitablePairs = calculateArbitrageProfit(prices);
-
   if (profitablePairs.length > 0) {
     const mostProfitablePair = profitablePairs[0]; // Беремо найвигіднішу пару  
-    console.log(mostProfitablePair);
-    
-    const workingСapital = 100; // Початковий капітал для арбітражу
-    executeArbitrage(mostProfitablePair, prices, workingСapital);
+    executeArbitrage(mostProfitablePair);
   } else {
     // log("Немає вигідних пар для арбітражу.");
   }
