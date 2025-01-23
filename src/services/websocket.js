@@ -3,6 +3,7 @@ import { WebSocket } from 'ws';
 import { calculateArbitrageProfit } from '../strategies/arbitrage.js';
 
 let prices = {};
+let reconnectInterval = 5000;
 
 // Торгові пари
 const symbols = [
@@ -158,7 +159,7 @@ export const connectWebSocket = (onMessage) => {
     .map((symbol) => `${symbol.toLowerCase()}@bookTicker`)
     .join('/');
 
-  const ws = new WebSocket(`wss://testnet.binance.vision/ws/${streams}`); // wss://testnet.binance.vision/ws wss://stream.binance.com:9443/ws
+  const ws = new WebSocket(` wss://testnet.binance.vision/ws/${streams}`); // wss://testnet.binance.vision/ws wss://stream.binance.com:9443/ws
 
   ws.on('open', () => {
     console.log('WebSocket підключено');
@@ -186,7 +187,8 @@ export const connectWebSocket = (onMessage) => {
   });
 
   ws.on('close', () => {
-    console.log('WebSocket закрито');
+    console.warn('WebSocket закрито. Спроба перепідключення...');
+    setTimeout(() => connectWebSocket(onMessage), reconnectInterval); // Автоматичне перепідключення
   });
 
   return ws;

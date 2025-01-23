@@ -31,8 +31,7 @@ const executeArbitrage = async (pair) => {
   isExecutingArbitrage = true; // Встановлюємо прапорець
 
   try {
-    log(`Старт арбітражу для пари ${pair.pairName}`);
-    console.log("Profit ", pair.profitInPercentage, " %"); // Профіт для пари, який надійшов з обчислень з webSocet данних
+    console.log(`Старт арбітражу для пари ${pair.pairName} `,"profit", pair.profitInPercentage, " %"); // Профіт для пари, який надійшов з обчислень з webSocet данних
 
     // Найвигідніша пара, яку ми отримуємо
     //  console.log(pair);
@@ -82,9 +81,14 @@ const executeArbitrage = async (pair) => {
      
     // Обчислення кількості монет для другої валюти для покупки
     const secondAmountSum = calculateAmountSecond(firstAmount, secondPairBidAskPriсe.bid, secondPairBidAskPriсe.ask, firstSeilPair, secondSeilPair);
-
+    let secondAmount;
     // Округлення кількості монет для другої валюти для покупки
-    const secondAmount = roundToStepSize(secondAmountSum, secondPairQuantity);
+    if (pair.first.symbol !== "BTCUSDT" && pair.first.symbol !== "ETHUSDT" && pair.first.symbol !== "BNBUSDT") {
+      secondAmount = roundToStepSize(secondAmountSum, thirdPairQuantity);
+    } else {
+      secondAmount = roundToStepSize(secondAmountSum, secondPairQuantity);
+    }
+
 
     // Значення які ми отримуємо до та після округлення для другої монети
     console.log("Sum 2 до перетворення", secondAmountSum, "Округлення після перетворення", secondAmount);
@@ -94,7 +98,7 @@ const executeArbitrage = async (pair) => {
     
     if (pair.first.symbol !== "BTCUSDT" && pair.first.symbol !== "ETHUSDT" && pair.first.symbol !== "BNBUSDT") {
       // Для перевернутої пари
-    /*  const secondOrderSell = await createOrder(secondSeilPair, "SELL", firstAmount);*/
+      const secondOrderSell = await createOrder(secondSeilPair, "SELL", firstAmount);
     }
     /*else if (pair.first.symbol === "DAIUSDT" && secondSeilPair === "BTCDAI") {
     const secondOrderBuy = await createOrder(secondSeilPair, "BUY", secondAmount); // Виключення пряма пара
@@ -128,9 +132,13 @@ const executeArbitrage = async (pair) => {
     }
 
     // Третій ордер продаж другої валюти за USDT
-    
+    let thirdAmount
     // Округлення не 
-    let thirdAmount = roundToStepSize(secondAmount, thirdPairQuantity);
+    if (pair.first.symbol !== "BTCUSDT" && pair.first.symbol !== "ETHUSDT" && pair.first.symbol !== "BNBUSDT") {
+      thirdAmount = roundToStepSize(secondAmount, thirdPairQuantity);
+    } else {
+      thirdAmount = roundToStepSize(secondAmount, thirdPairQuantity);
+    }
 
     console.log("Sum 3 до перетворення", secondAmount, "Округлення після перетворення", thirdAmount);
     // Очікуємо оновлення балансу другої валюти
@@ -193,7 +201,9 @@ const handlePricesUpdate = (updatedPrices) => {
   const profitablePairs = calculateArbitrageProfit(prices);
   if (profitablePairs.length > 0) {
     const mostProfitablePair = profitablePairs[0]; // Беремо найвигіднішу пару  
-    executeArbitrage(mostProfitablePair);
+    if (mostProfitablePair.profitInPercentage !== null) {
+      executeArbitrage(mostProfitablePair);
+    }
   } else {
     // log("Немає вигідних пар для арбітражу.");
   }

@@ -2,10 +2,12 @@
 export function calculateProfit({ pricesFirstCoin, pricesCoinToCoin, pricesSecondCoin, firstSymbol, secondSymbol, firstQuantity, secondQuantity, thirdQuantity }) {
   // Перевірка, чи всі необхідні дані отримані
   if (
-    !pricesFirstCoin || !pricesFirstCoin.bid ||
-    !pricesCoinToCoin || (!pricesCoinToCoin.bid && !pricesCoinToCoin.ask) ||
-    !pricesSecondCoin || !pricesSecondCoin.bid
+    !pricesFirstCoin || !pricesCoinToCoin ||
+    !pricesSecondCoin || !firstSymbol ||
+    !secondSymbol || !firstQuantity || !secondQuantity || !thirdQuantity
   ) {
+    // console.log("Не всі данні отримано!", pricesFirstCoin, pricesCoinToCoin, pricesSecondCoin, firstSymbol, secondSymbol, firstQuantity, secondQuantity, thirdQuantity);
+    
     return null; // Або повернути 0, або повідомлення, залежно від потреб
   }
 
@@ -35,17 +37,18 @@ export function calculateProfit({ pricesFirstCoin, pricesCoinToCoin, pricesSecon
     firstSymbol !== "ETHUSDT" &&
     firstSymbol !== "BNBUSDT"
   ) {
-   /* amountAfterSecondTrade = amountAfterFirstTrade * pricesCoinToCoin.ask; // Операція купівлі другої валюти за першу
-    amountAfterSecondTrade = Math.floor(amountAfterSecondTrade / firstQuantity) * secondQuantity;*/
-
+    // Підрахунок кількості для обміну перевернутої пари
+    amountAfterSecondTrade = amountAfterFirstTrade * pricesCoinToCoin.bid; 
+    amountAfterSecondTrade = Math.floor(amountAfterSecondTrade / thirdQuantity) * thirdQuantity;
+    amountAfterSecondTrade = parseFloat(amountAfterSecondTrade.toFixed(-Math.log10(thirdQuantity)));
   } else {
-    amountAfterSecondTrade = amountBeforeSecondOperation / pricesCoinToCoin.ask; // Операція продажу першої валюти за другу
+    // Підрахунок кількості для обміну прямої пари
+    amountAfterSecondTrade = amountBeforeSecondOperation / pricesCoinToCoin.ask; 
     amountAfterSecondTrade = Math.floor(amountAfterSecondTrade / secondQuantity) * secondQuantity;
     amountAfterSecondTrade = parseFloat(amountAfterSecondTrade.toFixed(-Math.log10(secondQuantity)));
   }
   
-  
-  
+  // Підрахунок допустимої кількості для третьої операції 
   let amountBeforeThirdTrade = Math.floor(amountAfterSecondTrade / thirdQuantity) * thirdQuantity;
   amountBeforeThirdTrade = parseFloat(amountAfterSecondTrade.toFixed(-Math.log10(thirdQuantity)));
 
@@ -62,10 +65,11 @@ export function calculateProfit({ pricesFirstCoin, pricesCoinToCoin, pricesSecon
   let amountAfterThirdTrade = Math.floor(finalAmountUSDT / 0.01) * 0.01;
 
   // Розрахунок прибутку
-  const profitInPercentage = ((amountAfterThirdTrade - usedUSDTInFirstOperation)/usedUSDTInFirstOperation) * 100;
-
+  let profitInPercentage = ((amountAfterThirdTrade - usedUSDTInFirstOperation)/usedUSDTInFirstOperation) * 100;
+  profitInPercentage = Math.floor(profitInPercentage / 0.01) * 0.01;
+  profitInPercentage = parseFloat(profitInPercentage.toFixed(-Math.log10(0.01)));
   
-  /*console.log("Кількість USDT на першу операцію",usedUSDTInFirstOperation , "Кількість першої монети після покупки", amountAfterFirstTrade, "Кількість першої монети після округлення ", amountBeforeSecondOperation,
+  /*console.log("Обмін", firstSymbol, secondSymbol, "Кількість USDT на першу операцію",usedUSDTInFirstOperation , "Кількість першої монети після покупки", amountAfterFirstTrade, "Кількість першої монети після округлення ", amountBeforeSecondOperation,
     "Кількість другої монети ", amountAfterSecondTrade, "Кількість другої монети після округлення ", amountBeforeThirdTrade, 
     "Кількість USDT після всіх операцій ", finalAmountUSDT, "Кількість USDT після округлення ", amountAfterThirdTrade,
     "tickSize1",  firstQuantity, "tickSize2", secondQuantity, "tickSize3", thirdQuantity, "Процент вигоди ", profitInPercentage,

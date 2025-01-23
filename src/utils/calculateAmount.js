@@ -12,7 +12,7 @@ export const calculateAmountSecond = (firstAmount, secondPairBidAskPriсeBid, se
     // Перевернута пара: X → BTC, ETH, BNB (множимо)
     amount = firstAmount * secondPairBidAskPriсeAsk; // Множимо на ціну для перевернутої пари
   }
-  else if (firstSymbol === "ETHUSDT" && secondSymbol === "ETHBTC") {
+  /*else if (firstSymbol === "ETHUSDT" && secondSymbol === "ETHBTC") {
     amount = firstAmount * secondPairBidAskPriсeAsk; // Множимо на ціну для перевернутої пари
   }
   else if (firstSymbol === "ETHUSDT" && secondSymbol === "ETHDAI") {
@@ -32,7 +32,7 @@ export const calculateAmountSecond = (firstAmount, secondPairBidAskPriсeBid, se
   }
   else if (firstSymbol === "DAIUSDT" && secondSymbol === "ETHDAI") {
     amount = firstAmount / secondPairBidAskPriсeBid; // Ділимо на ціну для прямої пари
-  } else {
+  }*/ else {
     // Пряма пара: BTC, ETH, BNB → X (ділимо)
     amount = firstAmount  / secondPairBidAskPriсeAsk; // Ділимо на ціну для прямої пари
   }
