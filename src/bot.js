@@ -36,7 +36,7 @@ const executeArbitrage = async (pair) => {
     // Найвигідніша пара, яку ми отримуємо
     //  console.log(pair);
     // Капітал для арбітражу
-    let workingСapital = 100;
+    let workingСapital = 200;
     // Назви пар які беруть учать в обміні
     let firstSeilPair = pair.first.symbol;
     let secondSeilPair = pair.second.symbol;
@@ -98,6 +98,7 @@ const executeArbitrage = async (pair) => {
     
     if (pair.first.symbol !== "BTCUSDT" && pair.first.symbol !== "ETHUSDT" && pair.first.symbol !== "BNBUSDT") {
       // Для перевернутої пари
+      console.log("Другий ордер для непрямої пари:", secondSeilPair, "SELL", firstAmount);
       const secondOrderSell = await createOrder(secondSeilPair, "SELL", firstAmount);
     }
     /*else if (pair.first.symbol === "DAIUSDT" && secondSeilPair === "BTCDAI") {

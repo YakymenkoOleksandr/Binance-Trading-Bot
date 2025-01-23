@@ -11,7 +11,7 @@ export function calculateProfit({ pricesFirstCoin, pricesCoinToCoin, pricesSecon
     return null; // Або повернути 0, або повідомлення, залежно від потреб
   }
 
-  let workingСapital = 100;
+  let workingСapital = 200;
  
   // Функція для обчислення суми після вирахування комісії
   const deductCommission = (amount) => amount - amount * 0.00075;
