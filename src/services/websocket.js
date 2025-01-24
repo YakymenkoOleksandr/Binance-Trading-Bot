@@ -159,7 +159,7 @@ export const connectWebSocket = (onMessage) => {
     .map((symbol) => `${symbol.toLowerCase()}@bookTicker`)
     .join('/');
 
-  const ws = new WebSocket(` wss://testnet.binance.vision/ws/${streams}`); // wss://testnet.binance.vision/ws wss://stream.binance.com:9443/ws
+  const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${streams}`); // wss://testnet.binance.vision/ws wss://stream.binance.com:9443/ws
 
   ws.on('open', () => {
     console.log('WebSocket підключено');
@@ -186,8 +186,8 @@ export const connectWebSocket = (onMessage) => {
     console.error('WebSocket помилка:', error);
   });
 
-  ws.on('close', () => {
-    console.warn('WebSocket закрито. Спроба перепідключення...');
+  ws.on('close', (code, reason) => {
+    console.warn(`WebSocket закрито. Код: ${code}, Причина: ${reason || 'не вказана'}. Спроба перепідключення..`);
     setTimeout(() => connectWebSocket(onMessage), reconnectInterval); // Автоматичне перепідключення
   });
 

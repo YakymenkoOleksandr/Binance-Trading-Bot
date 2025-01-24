@@ -2,7 +2,7 @@ import axios from 'axios';
 import { log, logError } from '../services/logger.js';
 import { env } from './env.js';
 
-const baseUrl = 'https://testnet.binance.vision'; // https://api.binance.com https://testnet.binance.vision
+const baseUrl = 'https://api.binance.com'; // https://api.binance.com https://testnet.binance.vision
 const apiKey = env('BINANCE_API_KEY');
 
 

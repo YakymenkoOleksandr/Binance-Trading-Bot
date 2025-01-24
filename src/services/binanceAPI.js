@@ -7,7 +7,7 @@ import { getStepSize, roundToStepSize } from '../utils/quantity.js'
 
 const apiKey = env('BINANCE_API_KEY');
 const apiSecret = env('BINANCE_API_SECRET');
-const baseUrl = 'https://testnet.binance.vision'; // 'https://testnet.binance.vision' https://api.binance.com
+const baseUrl = 'https://testnet.binance.vision'; // 'https://testnet.binance.vision' https://api.binance.com // Також потрібно змінити отримання ціни та /test
 
 let timeOffset = 0; // Глобальна змінна для збереження різниці часу
 
@@ -83,7 +83,7 @@ export const syncServerTime = async () => {
 
 export const getPrice = async (symbol) => {
   try {
-    const response = await axios.get(`${baseUrl}/api/v3/ticker/price`, {
+    const response = await axios.get(`https://api.binance.com/api/v3/ticker/price`, {
       params: { symbol }, // Торгова пара, наприклад "BTCUSDT"
     });
     console.log(`Ціна ${symbol}:`, response.data.price);
