@@ -10,6 +10,8 @@ import { getBNBBalance } from "./utils/getBNBBalance.js";
 import {  calculateAmountSecond } from "./utils/calculateAmount.js"
 import { syncServerTime, getPrice,  } from "./services/binanceAPI.js";
 import { getStepSize, roundToStepSize } from "./utils/quantity.js";
+import { tradingDOTCoin } from "./strategies/tradingDOTCoin.js";
+import { connectWebSocketForTrading } from "./services/webSocketForTrading.js";
 
 
 const LOG_INTERVAL = 5000; // Інтервал в мілісекундах (наприклад, 5 секунд)
@@ -25,6 +27,22 @@ let totalSum = 0;
 setInterval(() => {
   requestsCompleted = 0;
 }, RESET_INTERVAL);
+
+export const bot = {
+  start: async () => {
+    console.log("Запуск бота...");
+    log("Бот запущено.");
+     // Негайна синхронізація часу при запуску
+    await syncServerTime();
+    // Регулярна синхронізація часу кожні 5 хвилин
+    setInterval(syncServerTime, 5 * 60 * 1000);
+    tradingDOTCoin();
+    setInterval(() => {
+      tradingDOTCoin(); 
+    }, 1000 * 180);
+    
+  },
+};
 
 const executeArbitrage = async (pair) => {  
   // Прапорець виконання арбітражу
@@ -218,7 +236,7 @@ const handlePricesUpdate = (updatedPrices) => {
 
   // Знаходимо вигідні пари
   const profitablePairs = calculateArbitrageProfit(prices);
-  if (profitablePairs.length > 0) {
+  /*if (profitablePairs.length > 0) {
 
     const mostProfitablePair = profitablePairs[0]; // Беремо найвигіднішу пару 
     
@@ -229,19 +247,14 @@ const handlePricesUpdate = (updatedPrices) => {
     }
     } else {
     // log("Немає вигідних пар для арбітражу.");
-    }
+  }*/
+  
 };
 
 // Запуск WebSocket
-const ws = connectWebSocket(handlePricesUpdate);
+// const ws = connectWebSocket(handlePricesUpdate);
 
-export const bot = {
-  start: () => {
-    console.log("Запуск бота...");
-    log("Бот запущено.");
-     // Негайна синхронізація часу при запуску
-    syncServerTime();
-    // Регулярна синхронізація часу кожні 5 хвилин
-    setInterval(syncServerTime, 5 * 60 * 1000);
-  },
-};
+// Запуск WebSocket
+
+
+

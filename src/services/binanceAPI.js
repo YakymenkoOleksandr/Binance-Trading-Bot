@@ -7,7 +7,7 @@ import { getStepSize, roundToStepSize } from '../utils/quantity.js'
 
 const apiKey = env('BINANCE_API_KEY');
 const apiSecret = env('BINANCE_API_SECRET');
-const baseUrl = 'https://testnet.binance.vision'; // 'https://testnet.binance.vision' https://api.binance.com // Також потрібно змінити отримання ціни та /test
+const baseUrl = 'https://api.binance.com'; // 'https://testnet.binance.vision' https://api.binance.com // Також потрібно змінити отримання ціни та /test
 
 let timeOffset = 0; // Глобальна змінна для збереження різниці часу
 
@@ -141,3 +141,49 @@ export async function getBidAskVolumes(pair) {
     throw error; // Прокидаємо помилку для обробки вище
   }
 }
+
+// Отримання відкритих ордерів
+export const getOpenOrders = async (symbol) => {
+  try {
+    const params = {
+      symbol,
+      timestamp: Date.now() + timeOffset, // Додаємо timeOffset
+    };
+
+    const queryString = new URLSearchParams(params).toString();
+    const signature = sign(params, apiSecret);
+    const signedQuery = `${queryString}&signature=${signature}`;
+
+    const response = await axios.get(`${baseUrl}/api/v3/openOrders?${signedQuery}`, {
+      headers: { 'X-MBX-APIKEY': apiKey },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Помилка при отриманні відкритих ордерів:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// Отримання всіх ордерів (виконаних, скасованих, відкритих)
+export const getAllOrders = async (symbol) => {
+  try {
+    const params = {
+      symbol,
+      timestamp: Date.now() + timeOffset, // Додаємо timeOffset
+    };
+
+    const queryString = new URLSearchParams(params).toString();
+    const signature = sign(params, apiSecret);
+    const signedQuery = `${queryString}&signature=${signature}`;
+
+    const response = await axios.get(`${baseUrl}/api/v3/allOrders?${signedQuery}`, {
+      headers: { 'X-MBX-APIKEY': apiKey },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Помилка при отриманні всіх ордерів:', error.response?.data || error.message);
+    throw error;
+  }
+};

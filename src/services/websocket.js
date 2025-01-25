@@ -1,6 +1,5 @@
 // src/services/websocket.js
 import { WebSocket } from 'ws';
-import { calculateArbitrageProfit } from '../strategies/arbitrage.js';
 
 let prices = {};
 let reconnectInterval = 5000;

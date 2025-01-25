@@ -6,7 +6,7 @@ export function calculateProfit({ pricesFirstCoin, pricesCoinToCoin, pricesSecon
     !pricesSecondCoin || !firstSymbol ||
     !secondSymbol || !firstQuantity || !secondQuantity || !thirdQuantity
   ) {
-    // console.log("Не всі данні отримано!", pricesFirstCoin, pricesCoinToCoin, pricesSecondCoin, firstSymbol, secondSymbol, firstQuantity, secondQuantity, thirdQuantity);
+   // console.log("Не всі данні отримано!", firstSymbol, secondSymbol, pricesFirstCoin, pricesCoinToCoin, pricesSecondCoin, firstSymbol, secondSymbol, firstQuantity, secondQuantity, thirdQuantity);
     
     return null; // Або повернути 0, або повідомлення, залежно від потреб
   }
