@@ -7,7 +7,7 @@ import { getStepSize, roundToStepSize } from '../utils/quantity.js'
 
 const apiKey = env('BINANCE_API_KEY');
 const apiSecret = env('BINANCE_API_SECRET');
-const baseUrl = 'https://api.binance.com'; // 'https://testnet.binance.vision' https://api.binance.com // Також потрібно змінити отримання ціни та /test
+const baseUrl = 'https://testnet.binance.vision'; // 'https://testnet.binance.vision' https://api.binance.com // Також потрібно змінити отримання ціни та /test
 
 let timeOffset = 0; // Глобальна змінна для збереження різниці часу
 
@@ -83,7 +83,7 @@ export const syncServerTime = async () => {
 
 export const getPrice = async (symbol) => {
   try {
-    const response = await axios.get(`https://api.binance.com/api/v3/ticker/price`, {
+    const response = await axios.get(`${baseUrl}/api/v3/ticker/price`, {
       params: { symbol }, // Торгова пара, наприклад "BTCUSDT"
     });
     console.log(`Ціна ${symbol}:`, response.data.price);
@@ -184,6 +184,47 @@ export const getAllOrders = async (symbol) => {
     return response.data;
   } catch (error) {
     console.error('Помилка при отриманні всіх ордерів:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
+export const createDOTUSDTLimitOrder = async (symbol, side, price, quantity) => {
+  if (!symbol || !side || !price || !quantity) {
+    throw new Error(
+      `Необхідні параметри для createLimitOrder відсутні: symbol=${symbol}, side=${side}, price=${price}, quantity=${quantity}`
+    );
+  }
+
+  try {
+    const params = {
+      symbol,
+      side,
+      type: 'LIMIT', // Тип ордера - лімітний
+      price: price.toFixed(3), // Ціна (точність до 8 знаків після коми)
+      quantity: quantity.toFixed(2), // Кількість (точність до 8 знаків після коми)
+      timeInForce: 'GTC', // Ордер діє до виконання або скасування
+      timestamp: Date.now() + timeOffset,
+    };
+
+    const signature = sign(params, apiSecret);
+
+    const response = await axios.post(`${baseUrl}/api/v3/order`, null, {
+      headers: { 'X-MBX-APIKEY': apiKey },
+      params: { ...params, signature },
+    });
+
+    log(`Лімітний ордер створено: ${JSON.stringify(params)}`);
+    log(`Отримана відповідь: ${JSON.stringify(response.data)}`);
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      logError(`Помилка API: ${JSON.stringify(error.response.data)}`);
+    } else if (error.request) {
+      logError(`Запит не отримав відповіді: ${JSON.stringify(error.request)}`);
+    } else {
+      logError(`Помилка налаштування запиту: ${error.message}`);
+    }
     throw error;
   }
 };
