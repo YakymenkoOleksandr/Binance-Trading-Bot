@@ -12,7 +12,7 @@ import {
 export async function tradingDOTCoin() {
   const SYMBOL_DOTUSDT = "DOTUSDT";
   const MIN_PRICE = 6.2; // Мінімальна ціна
-  const MAX_PRICE = 6.4; // Максимальна ціна
+  const MAX_PRICE = 6.5; // Максимальна ціна
   const PRICE_STEP = 0.1; // Крок зміни ціни
   const ORDER_AMOUNT = 10; // Сума ордеру в USDT
   const QUANTITY_PAIR_DOTUSDT = 0.01; // Мінімальна кількість DOT, кратна парі
@@ -56,7 +56,7 @@ export async function tradingDOTCoin() {
       // Якщо немає ордерів, перевіряємо баланс для купівлі
       const DOTNeedBUYMARKET = Math.floor(ORDER_AMOUNT / ask / QUANTITY_PAIR_DOTUSDT) * QUANTITY_PAIR_DOTUSDT;
 
-      if (!existingSellOrder && !existingBuyOrder) {
+      if (!existingSellOrder && !existingBuyOrder && buyPrice < ask) {
         console.log(`Створюємо ордер на купівлю за ціною ${buyPrice}.`);
         await createDOTUSDTLimitOrder(
           SYMBOL_DOTUSDT,
